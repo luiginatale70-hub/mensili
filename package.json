@@ -1,0 +1,19 @@
+{
+  "name": "archivio-naaf",
+  "version": "1.0.0",
+  "description": "Modulo MENSILE — Nucleo Addestramento Ala Fissa",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-handlebars": "^7.1.2",
+    "pdf-parse": "^2.4.5",
+    "pdfkit": "^0.14.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

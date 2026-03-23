@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 10pt;
+    color: #000;
+    background: #fff;
+  }
+  .pagina {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 12mm 15mm 15mm 15mm;
+  }
+  /* TITOLO */
+  .titolo-principale {
+    text-align: center;
+    font-size: 10pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    line-height: 1.5;
+    margin-bottom: 4mm;
+    border: 1px solid #000;
+    padding: 3mm;
+  }
+  .riferimento {
+    text-align: center;
+    font-size: 9pt;
+    margin-bottom: 1mm;
+  }
+  .norma {
+    text-align: center;
+    font-size: 9pt;
+    margin-bottom: 5mm;
+  }
+  /* MESE E SEZIONE */
+  .mese-intestazione {
+    text-align: center;
+    font-size: 11pt;
+    font-weight: bold;
+    text-decoration: underline;
+    margin-bottom: 1mm;
+  }
+  .sezione-titolo {
+    font-size: 10pt;
+    font-weight: bold;
+    text-decoration: underline;
+    margin-bottom: 2mm;
+    margin-top: 4mm;
+  }
+  /* TABELLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+    margin-bottom: 3mm;
+  }
+  th {
+    background-color: #d0d0d0;
+    border: 1px solid #000;
+    padding: 2mm 1.5mm;
+    text-align: center;
+    font-size: 8.5pt;
+    font-weight: bold;
+    line-height: 1.3;
+  }
+  td {
+    border: 1px solid #000;
+    padding: 2mm 2mm;
+    text-align: center;
+    font-size: 9pt;
+  }
+  td.sinistra { text-align: left; }
+  td.num { text-align: right; font-family: 'Courier New', monospace; }
+  tr.totale-riga td {
+    font-weight: bold;
+    background-color: #efefef;
+  }
+  tr.totale-riga td.num { color: #000; }
+  /* FIRMA */
+  .firma {
+    margin-top: 12mm;
+    text-align: center;
+    font-size: 10.5pt;
+  }
+  .firma .titolo { font-weight: bold; margin-bottom: 6mm; }
+  /* RIEPILOGO */
+  .riepilogo-box {
+    margin-top: 8mm;
+    border: 2px solid #000;
+    padding: 3mm 4mm;
+    display: inline-block;
+    min-width: 120mm;
+  }
+  .riepilogo-box table { margin-bottom: 0; }
+  .riepilogo-box td { border: none; font-size: 10pt; padding: 1mm 2mm; }
+  .riepilogo-box .totale-finale { font-weight: bold; font-size: 11pt; border-top: 1px solid #000; }
+</style>
+</head>
+<body>
+<div class="pagina">
+
+  <!-- INTESTAZIONE DOCUMENTO -->
+  <div class="titolo-principale">
+    ELENCO PERSONALE E RELATIVE GIORNATE PER CUI SPETTANO<br>
+    I GENERI DI CONFORTO E LA COLAZIONE OBBLIGATORIA GIUSTA :
+  </div>
+  <div class="riferimento">S M M 20 - LOG -020 &nbsp;&nbsp; Edizione luglio 2019</div>
+  <div class="norma">NORME PER IL SERVIZIO DI VETTOVAGLIAMENTO DEL PERSONALE DELLA MARINA MILITARE</div>
+
+  <!-- MESE -->
+  <div class="mese-intestazione">MESE DI {{meseNome}} {{anno}}</div>
+
+  <!-- ═══════════════════════════════════════════════
+       SEZIONE PILOTI
+  ═══════════════════════════════════════════════ -->
+  <div class="sezione-titolo">PILOTI</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:5%">#</th>
+        <th style="width:18%">GRADO / CATEG.</th>
+        <th style="width:18%">COGNOME</th>
+        <th style="width:14%">NOME</th>
+        <th style="width:10%">GG<br>GENERI<br>CONFORTO</th>
+        <th style="width:11%">IMPORTO<br>GG € 2,41</th>
+        <th style="width:10%">GG<br>COLAZIONE</th>
+        <th style="width:11%">IMPORTO<br>COLAZIONE</th>
+        <th style="width:11%">TOTALE</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each piloti}}
+      <tr>
+        <td>{{@index_plus_1}}</td>
+        <td class="sinistra">{{grado}}</td>
+        <td class="sinistra">{{cognome}}</td>
+        <td class="sinistra">{{nome}}</td>
+        <td class="num">{{giorniGeneri}}</td>
+        <td class="num">€ {{importoGeneri}}</td>
+        <td class="num">{{giorniColazione}}</td>
+        <td class="num">{{#if importoColazione}}€ {{importoColazione}}{{/if}}</td>
+        <td class="num">€ {{totale}}</td>
+      </tr>
+      {{/each}}
+      <tr class="totale-riga">
+        <td colspan="8" class="sinistra">Totale Piloti</td>
+        <td class="num">€ {{totalePiloti}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ═══════════════════════════════════════════════
+       SEZIONE EQUIPAGGI FISSI DI VOLO
+  ═══════════════════════════════════════════════ -->
+  <div class="sezione-titolo">EQUIPAGGI FISSI DI VOLO</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:5%">#</th>
+        <th style="width:20%">GRADO / CATEG.</th>
+        <th style="width:20%">COGNOME</th>
+        <th style="width:16%">NOME</th>
+        <th style="width:17%">GG GENERI DI CONFORTO € 2,41</th>
+        <th style="width:17%">TOTALE</th>
+        <th style="width:5%"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each equipaggi}}
+      <tr>
+        <td>{{@index_plus_1}}</td>
+        <td class="sinistra">{{grado}}</td>
+        <td class="sinistra">{{cognome}}</td>
+        <td class="sinistra">{{nome}}</td>
+        <td class="num">{{giorniGeneri}}</td>
+        <td class="num">€ {{importoGeneri}}</td>
+        <td></td>
+      </tr>
+      {{/each}}
+      <tr class="totale-riga">
+        <td colspan="5" class="sinistra">Totale Equipaggi Fissi di Volo</td>
+        <td class="num">€ {{totaleEquipaggi}}</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- RIEPILOGO TOTALE -->
+  <div style="text-align: right; margin-top: 4mm;">
+    <div class="riepilogo-box">
+      <table>
+        <tr>
+          <td class="sinistra">Totale Piloti</td>
+          <td class="num">€ {{totalePiloti}}</td>
+        </tr>
+        <tr>
+          <td class="sinistra">Totale Equipaggi F.V.</td>
+          <td class="num">€ {{totaleEquipaggi}}</td>
+        </tr>
+        <tr class="totale-finale">
+          <td class="sinistra"><strong>TOTALE GENERALE</strong></td>
+          <td class="num"><strong>€ {{totaleGenerale}}</strong></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- FIRMA -->
+  <div class="firma">
+    <div class="titolo">IL CAPO NUCLEO</div>
+    <div class="nome">{{capoNucleo}}</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,464 @@
+/* ═══════════════════════════════════════════════════════════════
+   MODULO MENSILE — N.A.A.F.
+   Style da aggiungere a: CASEV/public/css/mensile.css
+   Include nel layout main.hbs oppure nella head con:
+   <link rel="stylesheet" href="/css/mensile.css">
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Variabili colore (coerenti con CASEV) ─────────────────── */
+:root {
+  --mensile-blu:       #1a3a5c;
+  --mensile-blu-hover: #0f2a45;
+  --mensile-accent:    #2e7bc4;
+  --mensile-grigio:    #f4f6f8;
+  --mensile-bordo:     #c8d4e0;
+  --mensile-rosso:     #c0392b;
+  --mensile-verde:     #1e7e34;
+  --mensile-oro:       #b8860b;
+  --mensile-testo:     #1a1a2e;
+}
+
+/* ── Contenitore principale ────────────────────────────────── */
+.mensile-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: var(--mensile-testo);
+}
+
+/* ── Breadcrumb ────────────────────────────────────────────── */
+.mensile-breadcrumb {
+  font-size: 13px;
+  margin-bottom: 16px;
+  color: #666;
+}
+.mensile-breadcrumb a {
+  color: var(--mensile-accent);
+  text-decoration: none;
+}
+.mensile-breadcrumb a:hover { text-decoration: underline; }
+.mensile-breadcrumb .sep {
+  margin: 0 6px;
+  color: #aaa;
+}
+
+/* ── Header pagina ─────────────────────────────────────────── */
+.mensile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: var(--mensile-blu);
+  border-radius: 8px;
+  color: #fff;
+}
+.mensile-header-icon {
+  font-size: 32px;
+  opacity: 0.9;
+}
+.mensile-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+.mensile-subtitle {
+  font-size: 13px;
+  opacity: 0.8;
+  margin: 2px 0 0;
+}
+
+/* ── Cards ─────────────────────────────────────────────────── */
+.mensile-card {
+  background: #fff;
+  border: 1px solid var(--mensile-bordo);
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.mensile-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--mensile-blu);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--mensile-bordo);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.mensile-card-title i {
+  color: var(--mensile-accent);
+}
+.mensile-card-genera {
+  background: var(--mensile-grigio);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+/* ── Grid form ─────────────────────────────────────────────── */
+.mensile-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+@media (max-width: 700px) {
+  .mensile-grid-3 { grid-template-columns: 1fr; }
+}
+
+/* ── Campi input ───────────────────────────────────────────── */
+.campo-gruppo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.campo-gruppo label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.campo-gruppo input,
+.campo-gruppo select {
+  padding: 7px 10px;
+  border: 1px solid var(--mensile-bordo);
+  border-radius: 5px;
+  font-size: 13.5px;
+  color: var(--mensile-testo);
+  background: #fff;
+  transition: border-color .2s;
+}
+.campo-gruppo input:focus,
+.campo-gruppo select:focus {
+  outline: none;
+  border-color: var(--mensile-accent);
+  box-shadow: 0 0 0 2px rgba(46,123,196,0.12);
+}
+
+/* ── Tabella ───────────────────────────────────────────────── */
+.table-responsive { overflow-x: auto; }
+.mensile-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.mensile-table th {
+  background: var(--mensile-blu);
+  color: #fff;
+  padding: 8px 7px;
+  text-align: center;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border: 1px solid rgba(255,255,255,0.15);
+  white-space: nowrap;
+}
+.mensile-table td {
+  padding: 5px 5px;
+  border: 1px solid var(--mensile-bordo);
+  vertical-align: middle;
+}
+.mensile-table tr:nth-child(even) td { background: var(--mensile-grigio); }
+.mensile-table tr:hover td { background: #e8f0f8; }
+.mensile-table tfoot td {
+  background: #dde8f4;
+  font-weight: 700;
+  border-top: 2px solid var(--mensile-blu);
+}
+.num-cell { text-align: center; color: #888; font-size: 12px; }
+.tot-cell { text-align: right; color: var(--mensile-blu); font-size: 14px; padding-right: 8px; }
+.riga-totale td { background: #dde8f4 !important; }
+
+/* ── Inputs nelle celle tabella ────────────────────────────── */
+.mensile-table input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  font-size: 13px;
+  background: transparent;
+  transition: border-color .2s, background .2s;
+}
+.mensile-table input:focus {
+  outline: none;
+  border-color: var(--mensile-accent);
+  background: #fff;
+}
+.mensile-table input[readonly] {
+  color: var(--mensile-blu);
+  font-weight: 600;
+  cursor: default;
+}
+.inp-grado    { min-width: 120px; }
+.inp-cognome  { min-width: 110px; text-transform: uppercase; }
+.inp-nome     { min-width: 80px; }
+.inp-num      { min-width: 60px; text-align: right; }
+
+/* ── Pulsanti ──────────────────────────────────────────────── */
+.btn-aggiungi {
+  margin-left: auto;
+  padding: 5px 12px;
+  background: var(--mensile-verde);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  transition: background .2s;
+}
+.btn-aggiungi:hover { background: #155724; }
+
+.btn-rimuovi {
+  padding: 4px 8px;
+  background: transparent;
+  color: var(--mensile-rosso);
+  border: 1px solid var(--mensile-rosso);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all .2s;
+}
+.btn-rimuovi:hover { background: var(--mensile-rosso); color: #fff; }
+
+.btn-genera {
+  padding: 12px 28px;
+  background: var(--mensile-blu);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.5px;
+  transition: background .2s, transform .1s;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}
+.btn-genera:hover  { background: var(--mensile-blu-hover); }
+.btn-genera:active { transform: scale(0.98); }
+.btn-genera:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-reset {
+  padding: 10px 20px;
+  background: transparent;
+  color: #888;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-reset:hover { background: #eee; color: #555; }
+
+.genera-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ── Riepilogo finale ──────────────────────────────────────── */
+.riepilogo-finale {
+  min-width: 240px;
+}
+.riepilogo-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 5px 0;
+  font-size: 14px;
+  border-bottom: 1px solid var(--mensile-bordo);
+}
+.riepilogo-totale {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--mensile-blu);
+  border-bottom: none;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 2px solid var(--mensile-blu);
+}
+
+/* ── Risultato ─────────────────────────────────────────────── */
+.mensile-risultato {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-top: 20px;
+}
+.risultato-ok {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #155724;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+.risultato-ok i { font-size: 22px; }
+.lista-files { display: flex; flex-direction: column; gap: 8px; }
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #c3e6cb;
+  border-radius: 5px;
+  padding: 8px 12px;
+  font-size: 13.5px;
+}
+.file-item i { color: #c0392b; font-size: 18px; }
+.file-item span { flex: 1; }
+.btn-download {
+  padding: 5px 12px;
+  background: var(--mensile-blu);
+  color: #fff;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background .2s;
+}
+.btn-download:hover { background: var(--mensile-blu-hover); }
+
+/* ── Errore ────────────────────────────────────────────────── */
+.mensile-errore {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-top: 20px;
+  color: #721c24;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+.mensile-errore i { font-size: 20px; }
+
+/* ── Dashboard MENSILE (index) ─────────────────────────────── */
+.mensile-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+}
+.mensile-card-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 28px 16px;
+  background: #fff;
+  border: 2px solid var(--mensile-bordo);
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--mensile-blu);
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all .2s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.mensile-card-link:hover {
+  border-color: var(--mensile-accent);
+  background: #eaf2fb;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(46,123,196,0.15);
+}
+.mensile-card-link i {
+  font-size: 36px;
+  color: var(--mensile-accent);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVBAR e LAYOUT — ARCHIVIO NAAF standalone
+═══════════════════════════════════════════════════════════════ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #f0f3f7; font-family: 'Segoe UI', Arial, sans-serif; }
+
+.naaf-navbar {
+  background: #1a3a5c;
+  border-bottom: 3px solid #2e7bc4;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.naaf-navbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.naaf-navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-size: 15px;
+}
+.naaf-navbar-brand i { color: #2e7bc4; font-size: 20px; }
+.brand-nome   { font-weight: 800; letter-spacing: 1px; }
+.brand-sep    { color: #2e7bc4; margin: 0 2px; }
+.brand-modulo { font-weight: 400; opacity: 0.85; font-size: 13px; letter-spacing: 0.5px; }
+
+.naaf-navbar-links { display: flex; gap: 8px; align-items: center; }
+.naaf-nav-link {
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all .2s;
+}
+.naaf-nav-link:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.naaf-nav-casev {
+  background: rgba(46,123,196,0.25);
+  border: 1px solid rgba(46,123,196,0.4);
+  color: #7ab8e8;
+}
+.naaf-nav-casev:hover { background: rgba(46,123,196,0.4); color: #fff; }
+
+.naaf-main {
+  min-height: calc(100vh - 54px - 42px);
+  padding: 0 0 30px;
+}
+
+.naaf-footer {
+  background: #1a3a5c;
+  color: rgba(255,255,255,0.5);
+  text-align: center;
+  font-size: 11px;
+  padding: 12px 20px;
+  letter-spacing: 0.3px;
+}
+.footer-sep { margin: 0 10px; color: #2e7bc4; }

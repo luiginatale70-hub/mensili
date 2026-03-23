@@ -1,0 +1,41 @@
+{{! views/mensile/index.hbs }}
+<div class="mensile-container">
+
+  <div class="mensile-header">
+    <div class="mensile-header-icon"><i class="fas fa-folder-open"></i></div>
+    <div>
+      <h1>Modulo MENSILE — N.A.A.F.</h1>
+      <p class="mensile-subtitle">Generazione comunicazioni mensili in PDF — {{mese}} {{anno}}</p>
+    </div>
+  </div>
+
+  <div class="mensile-dashboard">
+
+    <a href="/mensile/generi-conforto" class="mensile-card-link">
+      <i class="fas fa-utensils"></i>
+      Generi di Conforto
+    </a>
+
+    <a href="/mensile/colazione" class="mensile-card-link">
+      <i class="fas fa-coffee"></i>
+      Colazione Piloti
+    </a>
+
+    <a href="/mensile/pia" class="mensile-card-link">
+      <i class="fas fa-helicopter"></i>
+      Pronto Intervento Aereo
+    </a>
+
+    <a href="/mensile/presenza-festiva" class="mensile-card-link" style="opacity:.45;pointer-events:none;cursor:not-allowed">
+      <i class="fas fa-calendar-check"></i>
+      Presenza Festiva
+    </a>
+
+    <a href="/mensile/reperibilita" class="mensile-card-link" style="opacity:.45;pointer-events:none;cursor:not-allowed">
+      <i class="fas fa-phone-alt"></i>
+      Reperibilità Mensile
+    </a>
+
+  </div>
+
+</div>
