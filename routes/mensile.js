@@ -319,4 +319,34 @@ router.post('/api/calcola-spettanze', async (req, res) => {
   }
 });
 
+
+// REPERIBILITÀ MENSILE
+const pdfRep = require('../utils/pdfGeneratorReperibilita');
+router.get('/reperibilita', (req, res) => {
+  const ora = new Date();
+  res.render('mensile/reperibilita', { title:'Reperibilità Mensile', anno:ora.getFullYear(), meseIdx:ora.getMonth() });
+});
+router.post('/api/calcola-reperibilita', async (req, res) => {
+  try {
+    const {anno,meseIdx,cognomi} = req.body;
+    const ordini = require('../utils/ordiniVolo');
+    const r = await ordini.calcolaReperibilita(parseInt(anno),parseInt(meseIdx),cognomi||[]);
+    res.json({ok:true,spettanze:r.spettanze,dettagli:r.dettagli,giorniAnalizzati:r.giorniAnalizzati,giorniSenzaFirmato:r.giorniSenzaFirmato});
+  } catch(e){ res.status(500).json({ok:false,errore:e.message}); }
+});
+router.post('/reperibilita/genera', async (req, res) => {
+  try {
+    const dati=req.body, anno=dati.anno||new Date().getFullYear();
+    const MESI=['GENNAIO','FEBBRAIO','MARZO','APRILE','MAGGIO','GIUGNO','LUGLIO','AGOSTO','SETTEMBRE','OTTOBRE','NOVEMBRE','DICEMBRE'];
+    const meseNome=MESI[parseInt(dati.meseIdx)]||MESI[new Date().getMonth()];
+    let capoNucleo=dati.capoNucleo||'';
+    if(!capoNucleo){ try{ const p=JSON.parse(fs.readFileSync(path.join(__dirname,'..','config','personale.json'),'utf8')); capoNucleo=(p.capoNucleo||[])[0]||''; }catch(e){} }
+    const payload={anno,meseNome,personale:dati.personale||[],capoNucleo};
+    const pdfBuf=await pdfRep.genera('reperibilita-report',payload);
+    const nome='reperibilita_'+meseNome+'-'+anno+'.pdf';
+    const dest=archivio.salva(anno,meseNome,nome,pdfBuf);
+    res.json({ok:true,files:[{nome:'Report Reperibilità — '+meseNome+' '+anno,path:dest,nome_file:nome}]});
+  } catch(e){ console.error('[REP]',e); res.status(500).json({ok:false,errore:e.message}); }
+});
+
 module.exports = router;

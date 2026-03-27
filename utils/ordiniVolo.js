@@ -1,13 +1,12 @@
 /**
  * ordiniVolo.js
- * Calcola le spettanze colazione cercando i cognomi dei piloti
- * negli ordini di volo del mese selezionato.
+ * Calcola spettanze colazione e giorni reperibilità
+ * analizzando gli ordini di volo firmati del mese.
  *
- * Struttura: PERCORSO_BASE\ANNO\MESE\GIORNO\file.pdf
+ * Struttura: PERCORSO_BASE\ANNO\MESE\GIORNO\file_Firmato.pdf
  * Regole selezione file:
- *   1. Il file DEVE contenere "Firmato" nel nome (altrimenti è copia lavoro)
- *   2. Tra i file firmati, prende quello con VAR numero più alto
- *   3. Se non ci sono varianti, prende il file base firmato
+ *   1. Il file DEVE contenere "Firmato" nel nome
+ *   2. Tra i firmati, prende quello con VAR numero più alto
  */
 
 const fs       = require('fs');
@@ -31,21 +30,17 @@ function getPercorsoBase() {
 }
 
 /**
- * Sceglie l'ultima versione firmata tra i file di una cartella giorno.
- * REGOLA: il file DEVE contenere "Firmato" nel nome (case-insensitive).
+ * Sceglie l'ultima versione FIRMATA tra i file di una cartella giorno.
+ * REGOLA: il file DEVE contenere "Firmato" nel nome.
+ * Tra i firmati, prende quello con VAR numero più alto.
  */
 function scegliUltimaVersione(files) {
   const pdf = files.filter(f => f.toLowerCase().endsWith('.pdf'));
-
-  // FILTRO OBBLIGATORIO: solo file con "Firmato" nel nome
   const firmati = pdf.filter(f => /firmato/i.test(f));
-  if (!firmati.length) return null; // Nessun file firmato → ignora giorno
+  if (!firmati.length) return null;
 
-  // Cerca varianti tra i firmati: file con VAR_N nel nome
   const varianti = firmati.filter(f => /VAR[_\s]*(\d+)/i.test(f));
-
   if (varianti.length > 0) {
-    // Prendi la variante con numero VAR più alto
     varianti.sort((a, b) => {
       const nA = parseInt((a.match(/VAR[_\s]*(\d+)/i)||[0,0])[1]);
       const nB = parseInt((b.match(/VAR[_\s]*(\d+)/i)||[0,0])[1]);
@@ -53,36 +48,73 @@ function scegliUltimaVersione(files) {
     });
     return varianti[0];
   }
-
-  // Nessuna variante → prendi il primo file firmato
   return firmati[0];
 }
 
 /**
- * Verifica se il pilota è presente nell'ordine di volo come pilota effettivo.
- * Cerca il cognome seguito da ruolo pilota: (P), (IP), (2P), (CP)
+ * Verifica se il pilota è nella colonna Piloti con ruolo (P),(IP),(2P),(CP)
  */
 function pilotaPresente(testo, cognome) {
   if (!cognome || !testo) return false;
   const cog = cognome.toUpperCase().trim();
   const pattern = new RegExp(cog + '\\s*\\((?:P|IP|2P|CP)\\)', 'i');
-  return pattern.test(testo);
+  return pattern.test(testo.toUpperCase());
 }
 
 /**
- * Calcola le spettanze colazione per ogni pilota nel mese.
+ * Estrae i nominativi dall'equipaggio P-42 nella sezione SERVIZIO DI ALLARME.
  */
-async function calcolaSpettanze(anno, meseIdx, cognomi) {
+function estraiEquipaggioP42(testo) {
+  const t = testo.toUpperCase();
+
+  if (/ALLARME\s+SOSPESO/.test(t)) return [];
+
+  const idxAllarme = t.indexOf('SERVIZIO DI ALLARME');
+  if (idxAllarme === -1) return [];
+
+  const idxEquip = t.indexOf('EQUIPAGGIAMENTI OPERATIVI');
+  const blocco = idxEquip !== -1 ? t.slice(idxAllarme, idxEquip) : t.slice(idxAllarme);
+
+  const idxP42 = blocco.indexOf('P-42');
+  if (idxP42 === -1) return [];
+
+  const idxPH139 = blocco.indexOf('PH-139', idxP42);
+  const sezioneP42 = idxPH139 !== -1 ? blocco.slice(idxP42, idxPH139) : blocco.slice(idxP42);
+
+  // Se sezione vuota o solo "//" è sospeso
+  const contenuto = sezioneP42.replace(/P-42|MANTA|IN CAMPO|IN REPERIBILIT[A\u00C0]|\d{2}:\d{2}|\(\d+\)|[\/\-]/g,'').trim();
+  if (!contenuto || contenuto.length < 10) return [];
+
+  const re = /([A-Z][A-Z\u00C0-\u00D6\u00D8-\u00F6\s\u00B0\u00AA\d\.]+?)\s*\((?:P|IP|2P|CP|OV|TEV|ASAV|AOV|ARS|CV|EV|IS)\)/g;
+  const trovati = [];
+  let m;
+  while ((m = re.exec(sezioneP42)) !== null) {
+    const nome = m[1].trim();
+    if (nome.length > 2) trovati.push(nome);
+  }
+  return trovati;
+}
+
+/**
+ * Verifica se il cognome del personale NAAF è nell'equipaggio P-42 allarme
+ */
+function personaleInAllarmeP42(testo, cognome) {
+  if (!cognome || !testo) return false;
+  const equipaggio = estraiEquipaggioP42(testo);
+  const cog = cognome.toUpperCase().trim();
+  return equipaggio.some(nome => nome.includes(cog));
+}
+
+/**
+ * Funzione generica per analizzare tutti i giorni del mese
+ */
+async function analizzaMese(anno, meseIdx, cognomi, checkFn) {
   const basePath = getPercorsoBase();
   const meseName = NOMI_MESI[meseIdx];
   const cartellaBase = path.join(basePath, String(anno), meseName);
 
-  const risultati = {};
-  const dettagli  = {}; // per debug: quali giorni ha volato
-  cognomi.forEach(c => {
-    risultati[c.toUpperCase()] = 0;
-    dettagli[c.toUpperCase()]  = [];
-  });
+  const risultati = {}, dettagli = {};
+  cognomi.forEach(c => { risultati[c.toUpperCase()] = 0; dettagli[c.toUpperCase()] = []; });
 
   if (!fs.existsSync(cartellaBase)) {
     throw new Error(`Cartella non trovata: ${cartellaBase}\nVerifica il percorso nelle Impostazioni.`);
@@ -99,34 +131,38 @@ async function calcolaSpettanze(anno, meseIdx, cognomi) {
     const files = fs.readdirSync(cartellaGiorno);
     const ultimoFile = scegliUltimaVersione(files);
 
-    if (!ultimoFile) {
-      giorniSenzaFirmato++;
-      console.log(`[ODV] Giorno ${giorno}: nessun file firmato trovato (${files.join(', ')})`);
-      continue;
-    }
-
+    if (!ultimoFile) { giorniSenzaFirmato++; continue; }
     giorniAnalizzati++;
-    const filePath = path.join(cartellaGiorno, ultimoFile);
-    console.log(`[ODV] Giorno ${giorno}: analisi ${ultimoFile}`);
 
     try {
-      const dataBuffer = fs.readFileSync(filePath);
-      const data = await pdfParse(dataBuffer);
-      const testo = data.text.toUpperCase();
-
+      const data = await pdfParse(fs.readFileSync(path.join(cartellaGiorno, ultimoFile)));
+      const testo = data.text;
       for (const cognome of cognomi) {
-        if (pilotaPresente(testo, cognome)) {
+        if (checkFn(testo, cognome)) {
           risultati[cognome.toUpperCase()]++;
           dettagli[cognome.toUpperCase()].push(giorno);
         }
       }
     } catch(e) {
-      console.warn(`[ODV] Errore lettura ${filePath}: ${e.message}`);
+      console.warn(`[ODV] Errore ${ultimoFile}: ${e.message}`);
     }
   }
 
-  console.log(`[ODV] Analizzati: ${giorniAnalizzati} giorni (${giorniSenzaFirmato} senza firmato)`);
   return { spettanze: risultati, dettagli, giorniAnalizzati, giorniSenzaFirmato };
 }
 
-module.exports = { calcolaSpettanze, getPercorsoBase, NOMI_MESI };
+/**
+ * Calcola spettanze colazione (presenza come pilota nei voli)
+ */
+async function calcolaSpettanze(anno, meseIdx, cognomi) {
+  return analizzaMese(anno, meseIdx, cognomi, pilotaPresente);
+}
+
+/**
+ * Calcola giorni reperibilità (presenza equipaggio P-42 allarme)
+ */
+async function calcolaReperibilita(anno, meseIdx, cognomi) {
+  return analizzaMese(anno, meseIdx, cognomi, personaleInAllarmeP42);
+}
+
+module.exports = { calcolaSpettanze, calcolaReperibilita, getPercorsoBase, NOMI_MESI };
