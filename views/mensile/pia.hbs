@@ -8,7 +8,11 @@
   </nav>
 
   <div class="mensile-header">
+<<<<<<< HEAD
     <div class="mensile-header-icon"><i class="fas fa-plane"></i></div>
+=======
+    <div class="mensile-header-icon"><i class="fas fa-helicopter"></i></div>
+>>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
     <div>
       <h1>Pronto Intervento Aereo</h1>
       <p class="mensile-subtitle">Genera lettera + elenchi PIA, Istruttori, EFV, Assenze</p>
@@ -60,6 +64,7 @@
         <div id="anteprima-firma" class="anteprima-firma" style="display:none"></div>
       </div>
     </div>
+<<<<<<< HEAD
 <div class="pia-grid">
 
   <!-- COLONNA SINISTRA -->
@@ -74,11 +79,31 @@
         </button>
       </div>
 
+=======
+
+    <!-- ELENCO PIA -->
+    <div class="mensile-card">
+      <div class="mensile-card-title">
+        <i class="fas fa-shield-alt"></i> Elenco P.I.A.
+        <button type="button" class="btn-aggiungi" id="btnAggiungiPIA">
+          <i class="fas fa-plus"></i> Aggiungi
+        </button>
+      </div>
+>>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
       <div class="table-responsive">
         <table class="mensile-table">
           <thead>
             <tr>
+<<<<<<< HEAD
               <th>#</th><th>Grado</th><th>Cognome</th><th>Nome</th><th>Gg</th><th></th>
+=======
+              <th class="col-num">#</th>
+              <th class="col-grado">Grado</th>
+              <th class="col-cognome">Cognome</th>
+              <th class="col-nome">Nome</th>
+              <th class="col-gg">Giorni</th>
+              <th class="col-del"></th>
+>>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
             </tr>
           </thead>
           <tbody id="bodyPIA"></tbody>
@@ -86,6 +111,7 @@
       </div>
     </div>
 
+<<<<<<< HEAD
     <!-- EFV -->
     <div class="mensile-card">
       <div class="mensile-card-title">
@@ -122,11 +148,30 @@
         </button>
       </div>
 
+=======
+    <!-- ISTRUTTORI -->
+    <div class="mensile-card">
+      <div class="mensile-card-title">
+        <i class="fas fa-chalkboard-teacher"></i> Istruttori di Specialità
+        <button type="button" class="btn-aggiungi" id="btnAggiungiIST">
+          <i class="fas fa-plus"></i> Aggiungi
+        </button>
+      </div>
+>>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
       <div class="table-responsive">
         <table class="mensile-table">
           <thead>
             <tr>
+<<<<<<< HEAD
               <th>#</th><th>Grado</th><th>Cognome</th><th>Nome</th><th>Gg</th><th></th>
+=======
+              <th class="col-num">#</th>
+              <th class="col-grado">Grado</th>
+              <th class="col-cognome">Cognome</th>
+              <th class="col-nome">Nome</th>
+              <th class="col-gg">Giorni</th>
+              <th class="col-del"></th>
+>>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
             </tr>
           </thead>
           <tbody id="bodyIST"></tbody>
@@ -134,6 +179,7 @@
       </div>
     </div>
 
+<<<<<<< HEAD
    <!-- ASSENZE -->
     <div class="mensile-card">
       <div class="mensile-card-title">
@@ -141,6 +187,39 @@
         <button type="button" class="btn-aggiungi" onclick="apriModale('modaleASS')">
   <i class="fas fa-plus"></i> Aggiungi Assenza
 </button>
+=======
+    <!-- EFV -->
+    <div class="mensile-card">
+      <div class="mensile-card-title">
+        <i class="fas fa-users"></i> Equipaggi Fissi di Volo
+        <button type="button" class="btn-aggiungi" id="btnAggiungiEFV">
+          <i class="fas fa-plus"></i> Aggiungi
+        </button>
+      </div>
+      <div class="table-responsive">
+        <table class="mensile-table">
+          <thead>
+            <tr>
+              <th class="col-num">#</th>
+              <th class="col-grado">Grado</th>
+              <th class="col-cognome">Cognome</th>
+              <th class="col-nome">Nome</th>
+              <th class="col-del"></th>
+            </tr>
+          </thead>
+          <tbody id="bodyEFV"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ASSENZE -->
+    <div class="mensile-card">
+      <div class="mensile-card-title">
+        <i class="fas fa-calendar-times"></i> Statino Assenze
+        <button type="button" class="btn-aggiungi" id="btnAggiungiASS">
+          <i class="fas fa-plus"></i> Aggiungi Assenza
+        </button>
+>>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
       </div>
       <p style="font-size:13px;color:#666;margin:0 0 12px">Lasciare vuoto se nessuna assenza nel mese.</p>
       <div class="table-responsive">
@@ -163,10 +242,13 @@
       </div>
     </div>
 
+<<<<<<< HEAD
   </div> <!-- FINE COLONNA DESTRA -->
 
 </div>
 
+=======
+>>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
     <!-- GENERA -->
     <div class="mensile-card mensile-card-genera">
       <div class="genera-actions">
@@ -241,11 +323,21 @@ document.addEventListener('DOMContentLoaded', async function(){
   var oggi=new Date();
   $('meseIdx').value=oggi.getMonth();
   $('anno').value=oggi.getFullYear();
+<<<<<<< HEAD
 await caricaConfig();
 autoCaricaPIA();
 await aggiornaMese();
  
   document.getElementById('btnGenera').addEventListener('click', generaPDF);
+=======
+  await caricaConfig();
+  await aggiornaMese();
+  $('btnAggiungiPIA').onclick = function(){ apriModale('modalePIA'); };
+  $('btnAggiungiIST').onclick = function(){ apriModale('modaleIST'); };
+  $('btnAggiungiEFV').onclick = function(){ apriModale('modaleEFV'); };
+  $('btnAggiungiASS').onclick = function(){ apriModale('modaleASS'); };
+  $('btnGenera').onclick = generaPDF;
+>>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
   $('sostituto').addEventListener('change', aggiornaAnteprima);
   document.querySelectorAll('.modale').forEach(function(el){
     el.addEventListener('click', function(e){ if(e.target===el) el.style.display='none'; });
@@ -255,6 +347,7 @@ await aggiornaMese();
 async function caricaConfig(){
   try{ CFG=await(await fetch('/mensile/api/config')).json(); }
   catch(e){ CFG={personale:{capoNucleo:[],piloti:[],efv:[]},tariffe:{}}; }
+<<<<<<< HEAD
 
   CFG.capoNucleoAttivo=(CFG.personale.capoNucleo||[])[0]||'';
 
@@ -263,12 +356,23 @@ async function caricaConfig(){
   selSos.innerHTML='<option value="">— seleziona sostituto —</option>';
 
   [].concat(CFG.personale.piloti||[], CFG.personale.efv||[]).forEach(function(p){
+=======
+  CFG.capoNucleoAttivo=(CFG.personale.capoNucleo||[])[0]||'';
+
+  // Tutti il personale = piloti + efv
+  var tutti=[].concat(CFG.personale.piloti||[]).concat(CFG.personale.efv||[]);
+
+  // Sostituto
+  var selSos=$('sostituto');
+  tutti.forEach(function(p){
+>>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
     var o=document.createElement('option');
     o.value=p.grado+'|'+p.nome+'|'+p.cognome;
     o.textContent=p.grado+' '+p.nome+' '+p.cognome;
     selSos.appendChild(o);
   });
 
+<<<<<<< HEAD
 
 
   // ===== IST → PILOTI =====
@@ -330,6 +434,28 @@ function autoCaricaPIA(){
   (CFG.personale.piloti || []).forEach(function(p){
     aggiungiIST(p);
   });
+=======
+  // Modali PIA, IST, ASS — tutto il personale
+  ['listaPIA','listaIST','listaASS'].forEach(function(lid, i){
+    var lista=$(lid); lista.innerHTML='';
+    var modaleId=['modalePIA','modaleIST','modaleASS'][i];
+    var bodyId=['bodyPIA','bodyIST','bodyASS'][i];
+    var addFn=[aggiungiPIA,aggiungiIST,aggiungiASS][i];
+    tutti.forEach(function(p){
+      var btn=mkBtn(p.grado,p.cognome+' '+p.nome);
+      btn.onclick=function(){ addFn(p); chiudiModale(modaleId); };
+      lista.appendChild(btn);
+    });
+  });
+
+  // Modale EFV — solo efv
+  var listaEFV=$('listaEFV'); listaEFV.innerHTML='';
+  (CFG.personale.efv||[]).forEach(function(e){
+    var btn=mkBtn(e.grado,e.cognome+' '+e.nome);
+    btn.onclick=function(){ aggiungiEFV(e); chiudiModale('modaleEFV'); };
+    listaEFV.appendChild(btn);
+  });
+>>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
 }
 
 async function aggiornaMese(){
@@ -392,6 +518,7 @@ function rimuoviRiga(btn){
   tr.remove();
   tbody.querySelectorAll('tr').forEach(function(r,i){ r.querySelector('.num-cell').textContent=i+1; });
 }
+<<<<<<< HEAD
 function raccogliTabella(bodyId){
   var righe = [];
 
@@ -419,6 +546,22 @@ function raccogliTabella(bodyId){
 
   });
 
+=======
+
+function raccogliTabella(bodyId){
+  var righe=[];
+  document.querySelectorAll('#'+bodyId+' tr').forEach(function(tr){
+    righe.push({
+      grado:       getVal(tr,'grado'),
+      cognome:     getVal(tr,'cognome'),
+      nome:        getVal(tr,'nome'),
+      giorni:      getVal(tr,'giorni')||giorniMese,
+      descrizione: getVal(tr,'descrizione')||'',
+      dal:         getVal(tr,'dal')||'',
+      al:          getVal(tr,'al')||'',
+    });
+  });
+>>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
   return righe;
 }
 
@@ -496,6 +639,9 @@ function resetForm(){
   idxPIA=idxIST=idxEFV=idxASS=0;
   $('risultatoBox').style.display=$('erroreBox').style.display='none';
 }
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
 </script>

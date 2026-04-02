@@ -144,8 +144,11 @@ document.addEventListener('DOMContentLoaded', async function(){
   $('dataStatino').value=d+'/'+m+'/'+oggi.getFullYear();
   await caricaConfig();
   await aggiornaMese();
+<<<<<<< HEAD
   autoCaricaPiloti();
 
+=======
+>>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
   $('btnAggiungi').onclick=function(){ apriModale('modalePersonale'); };
   $('btnGenera').onclick=generaPDF;
   $('sostituto').addEventListener('change', aggiornaAnteprima);
@@ -157,7 +160,10 @@ document.addEventListener('DOMContentLoaded', async function(){
 async function caricaConfig(){
   try{ CFG=await(await fetch('/mensile/api/config')).json(); }
   catch(e){ CFG={personale:{capoNucleo:[],piloti:[],efv:[]},tariffe:{}}; }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
   CFG.capoNucleoAttivo=(CFG.personale.capoNucleo||[])[0]||'';
 
   // Sostituto — tutti piloti + efv
@@ -177,6 +183,7 @@ async function caricaConfig(){
     lista.appendChild(btn);
   });
 }
+<<<<<<< HEAD
 function autoCaricaPiloti(){
   if(!CFG.personale || !CFG.personale.piloti) return;
 
@@ -188,6 +195,8 @@ function autoCaricaPiloti(){
     aggiungiPilota(p);
   });
 }
+=======
+>>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
 
 async function aggiornaMese(){
   var mi=$('meseIdx').value, an=$('anno').value;
