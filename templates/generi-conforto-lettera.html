@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    color: #000;
+    background: #fff;
+    padding: 0;
+  }
+  .pagina {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 20mm 25mm 20mm 25mm;
+    position: relative;
+  }
+  /* INTESTAZIONE */
+  .intestazione {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8mm;
+  }
+  .intestazione-sx {
+    font-size: 10pt;
+    line-height: 1.5;
+    max-width: 80mm;
+  }
+  .intestazione-dx {
+    font-size: 10pt;
+    line-height: 1.8;
+    text-align: left;
+    max-width: 85mm;
+  }
+  .intestazione-dx .label { font-weight: bold; }
+  .ministero {
+    font-size: 10pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-bottom: 1px solid #000;
+    padding-bottom: 2mm;
+    margin-bottom: 4mm;
+  }
+  .nucleo {
+    font-size: 11pt;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 2mm;
+  }
+  .mail {
+    font-size: 9pt;
+    text-align: center;
+    margin-bottom: 6mm;
+  }
+  /* METADATI */
+  .metadati {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6mm;
+    font-size: 10pt;
+  }
+  .metadati-sx { }
+  .metadati-dx {
+    text-align: right;
+    font-size: 10.5pt;
+  }
+  /* DESTINATARIO */
+  .destinatario {
+    margin-bottom: 8mm;
+    font-size: 11pt;
+  }
+  .destinatario .alla { font-weight: bold; }
+  /* OGGETTO */
+  .oggetto-box {
+    margin-bottom: 8mm;
+    font-size: 11pt;
+  }
+  .oggetto-box .etichetta { font-weight: bold; text-decoration: underline; }
+  /* CORPO */
+  .corpo {
+    font-size: 11.5pt;
+    line-height: 1.8;
+    text-align: justify;
+    margin-bottom: 10mm;
+  }
+  .corpo p { margin-bottom: 5mm; }
+  /* FIRMA */
+  .firma {
+    margin-top: 15mm;
+    text-align: center;
+    font-size: 11pt;
+  }
+  .firma .titolo { font-weight: bold; margin-bottom: 8mm; }
+  .firma .nome { }
+  /* POSIZIONE TITOLARIO */
+  .titolario {
+    font-size: 9pt;
+    margin-top: 3mm;
+  }
+  .titolario span { margin-right: 15mm; }
+  hr.separatore {
+    border: none;
+    border-top: 1px solid #000;
+    margin: 3mm 0;
+  }
+</style>
+</head>
+<body>
+<div class="pagina">
+
+  <!-- INTESTAZIONE SINISTRA / DESTRA -->
+  <div class="intestazione">
+    <div class="intestazione-sx">
+      <div class="ministero">Ministero delle Infrastrutture<br>e dei Trasporti</div>
+      <br>
+      <strong>DIREZIONE MARITTIMA</strong><br>
+      Segreteria Gestione Contabile del personale<br>
+      <strong>- P E S C A R A -</strong>
+    </div>
+    <div class="intestazione-dx">
+      &nbsp;<br>
+      &nbsp;<br>
+      <div><strong>Direzione Marittima</strong></div>
+      <div>Pescara</div>
+      <br>
+      <div class="nucleo">Nucleo Addestramento Ala Fissa</div>
+      <div class="mail">Mail: naaf@mit.gov.it</div>
+    </div>
+  </div>
+
+  <hr class="separatore">
+
+  <!-- METADATI -->
+  <div class="metadati">
+    <div class="metadati-sx">
+      <div class="titolario">
+        <span>Posizione Titolario d'Archivio: <strong>06.05.01</strong></span>
+        <span>All.: <strong>_1_</strong></span>
+      </div>
+    </div>
+    <div class="metadati-dx">
+      65131 Pescara, <strong>{{dataLettera}}</strong>
+    </div>
+  </div>
+
+  <!-- OGGETTO -->
+  <div class="oggetto-box">
+    <span class="etichetta">OGGETTO :</span>&nbsp;&nbsp;
+    Generi di conforto. Personale N.A.A.F. - Mese {{meseNome}} {{anno}}.-
+  </div>
+
+  <!-- RIFERIMENTI -->
+  <div class="corpo">
+    <p>Riferimenti:<br>
+    SMM - LOG - 020 Edizione luglio 2019;</p>
+
+    <p style="text-indent: 20mm;">
+      Si trasmette, in allegato, l'elenco del personale di questo Nucleo Addestramento
+      riportante le spettanze dei generi di conforto, come previsto dalla pubblicazione
+      in riferimento, per il mese di <strong>{{meseNome}} {{anno}}</strong>.
+    </p>
+
+    <p style="text-indent: 20mm;">
+      Per questioni logistiche, trattandosi di personale sovente in missione,
+      si chiede la somministrazione in contanti anzichè in natura.
+    </p>
+  </div>
+
+  <!-- FIRMA -->
+  <div class="firma">
+    <div class="titolo">IL CAPO NUCLEO</div>
+    <div class="nome">{{capoNucleo}}</div>
+  </div>
+
+</div>
+</body>
+</html>

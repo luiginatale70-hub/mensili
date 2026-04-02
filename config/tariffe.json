@@ -1,0 +1,15 @@
+{
+  "_istruzioni": "Modificare gli importi in caso di aggiornamento tariffe. Salvare in formato UTF-8.",
+  "generiConforto": {
+    "importoGiornaliero": 2.41,
+    "descrizione": "Generi di conforto - importo per giorno"
+  },
+  "colazioneObbligatoria": {
+    "importoGiornaliero": 1.85,
+    "descrizione": "Colazione obbligatoria piloti - importo per giorno"
+  },
+  "ordiniVolo": {
+    "percorso": "\\\\napescara79\\ordini di volo",
+    "descrizione": "Percorso cartella ordini di volo (share di rete)"
+  }
+}

@@ -1,0 +1,353 @@
+{{! views/mensile/colazione.hbs }}
+<div class="mensile-container">
+
+  <nav class="mensile-breadcrumb">
+    <a href="/mensile"><i class="fas fa-home"></i> MENSILE</a>
+    <span class="sep">›</span>
+    <span>Colazione Piloti</span>
+  </nav>
+
+  <div class="mensile-header">
+    <div class="mensile-header-icon"><i class="fas fa-coffee"></i></div>
+    <div>
+      <h1>Colazione Obbligatoria Piloti</h1>
+      <p class="mensile-subtitle">Genera lettera + statino colazione PDF</p>
+    </div>
+  </div>
+
+  <form id="formColazione" class="mensile-form">
+
+    <!-- DATI GENERALI -->
+    <div class="mensile-card">
+      <div class="mensile-card-title"><i class="fas fa-calendar-alt"></i> Dati Generali</div>
+      <div class="mensile-grid-4">
+        <div class="campo-gruppo">
+          <label>Mese</label>
+          <select id="meseIdx" onchange="aggiornaMese()">
+            <option value="0">GENNAIO</option><option value="1">FEBBRAIO</option>
+            <option value="2">MARZO</option><option value="3">APRILE</option>
+            <option value="4">MAGGIO</option><option value="5">GIUGNO</option>
+            <option value="6">LUGLIO</option><option value="7">AGOSTO</option>
+            <option value="8">SETTEMBRE</option><option value="9">OTTOBRE</option>
+            <option value="10">NOVEMBRE</option><option value="11">DICEMBRE</option>
+          </select>
+        </div>
+        <div class="campo-gruppo">
+          <label>Anno</label>
+          <input type="number" id="anno" value="{{anno}}" min="2020" max="2099" onchange="aggiornaMese()">
+        </div>
+        <div class="campo-gruppo">
+          <label>Data statino</label>
+          <input type="text" id="dataStatino" placeholder="es. 02/02/2026">
+        </div>
+        <div class="campo-gruppo">
+          <label>Numero Protocollo</label>
+          <input type="text" id="protocollo" placeholder="es. 01.02.03/2026">
+        </div>
+      </div>
+      <!-- FIRMA -->
+      <div class="campo-gruppo" style="margin-top:12px">
+        <label class="label-checkbox">
+          <input type="checkbox" id="chkAssente" onchange="toggleAssente()">
+          <span>Capo Nucleo assente — firma per delega</span>
+        </label>
+      </div>
+      <div id="bloccoAssente" style="display:none; margin-top:12px; max-width:500px">
+        <label>Sostituto</label>
+        <select id="sostituto" class="select-grande">
+          <option value="">— seleziona sostituto —</option>
+        </select>
+        <div id="anteprima-firma" class="anteprima-firma" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- PILOTI -->
+    <div class="mensile-card">
+      <div class="mensile-card-title">
+        <i class="fas fa-plane"></i> Piloti — Spettanze Colazione
+        <button type="button" class="btn-aggiungi" id="btnAggiungi">
+          <i class="fas fa-plus"></i> Aggiungi Pilota
+        </button>
+        <button type="button" class="btn-calcola" id="btnCalcola" onclick="calcolaSpettanze()">
+          <i class="fas fa-calculator"></i> Calcola da Ordini di Volo
+        </button>
+      </div>
+      <div id="msgCalcolo" style="display:none; margin:8px 0; padding:10px 14px; border-radius:6px; font-size:14px;"></div>
+      <div class="table-responsive">
+        <table class="mensile-table">
+          <thead>
+            <tr>
+              <th class="col-num">#</th>
+              <th class="col-grado">Grado</th>
+              <th class="col-cognome">Cognome</th>
+              <th class="col-nome">Nome</th>
+              <th class="col-gg">Spettanza<br>(giorni)</th>
+              <th class="col-del"></th>
+            </tr>
+          </thead>
+          <tbody id="bodyPiloti"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- GENERA -->
+    <div class="mensile-card mensile-card-genera">
+      <div class="genera-actions">
+        <button type="button" class="btn-genera" id="btnGenera">
+          <i class="fas fa-file-pdf"></i> Genera PDF e Archivia
+        </button>
+        <button type="button" class="btn-reset" onclick="resetForm()">
+          <i class="fas fa-undo"></i> Reset
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <div id="risultatoBox" class="mensile-risultato" style="display:none">
+    <div class="risultato-ok"><i class="fas fa-check-circle"></i><strong>PDF generati e archiviati!</strong></div>
+    <div id="listaFiles" class="lista-files"></div>
+  </div>
+  <div id="erroreBox" class="mensile-errore" style="display:none">
+    <i class="fas fa-exclamation-triangle"></i><span id="erroreMsg"></span>
+  </div>
+
+  <!-- MODALE -->
+  <div id="modalePersonale" class="modale" style="display:none">
+    <div class="modale-box">
+      <div class="modale-titolo">
+        <i class="fas fa-plane"></i> Seleziona Pilota
+        <button type="button" class="modale-chiudi" onclick="chiudiModale('modalePersonale')">&#x2715;</button>
+      </div>
+      <div id="listaPersonale" class="modale-lista"></div>
+    </div>
+  </div>
+
+</div>
+<script>
+var CFG = { personale:{}, tariffe:{} };
+var giorniMese = 31, idxP = 0;
+function $(s){ return document.getElementById(s); }
+function esc(s){ return (s||'').replace(/"/g,'&quot;'); }
+function apriModale(id){ $(id).style.display='flex'; }
+function chiudiModale(id){ $(id).style.display='none'; }
+function mkBtn(grado,nome){
+  var btn=document.createElement('button'); btn.type='button'; btn.className='modale-item';
+  btn.innerHTML='<span class="item-grado">'+grado+'</span><span class="item-nome">'+nome+'</span>';
+  return btn;
+}
+
+document.addEventListener('DOMContentLoaded', async function(){
+  var oggi=new Date();
+  $('meseIdx').value=oggi.getMonth();
+  $('anno').value=oggi.getFullYear();
+  var d=String(oggi.getDate()).padStart(2,'0'), m=String(oggi.getMonth()+1).padStart(2,'0');
+  $('dataStatino').value=d+'/'+m+'/'+oggi.getFullYear();
+  await caricaConfig();
+  await aggiornaMese();
+  autoCaricaPiloti();
+
+  $('btnAggiungi').onclick=function(){ apriModale('modalePersonale'); };
+  $('btnGenera').onclick=generaPDF;
+  $('sostituto').addEventListener('change', aggiornaAnteprima);
+  document.querySelectorAll('.modale').forEach(function(el){
+    el.addEventListener('click',function(e){ if(e.target===el) el.style.display='none'; });
+  });
+});
+
+async function caricaConfig(){
+  try{ CFG=await(await fetch('/mensile/api/config')).json(); }
+  catch(e){ CFG={personale:{capoNucleo:[],piloti:[],efv:[]},tariffe:{}}; }
+
+  CFG.capoNucleoAttivo=(CFG.personale.capoNucleo||[])[0]||'';
+
+  // Sostituto — tutti piloti + efv
+  var selSos=$('sostituto');
+  [].concat(CFG.personale.piloti||[]).concat(CFG.personale.efv||[]).forEach(function(p){
+    var o=document.createElement('option');
+    o.value=p.grado+'|'+p.nome+'|'+p.cognome;
+    o.textContent=p.grado+' '+p.nome+' '+p.cognome;
+    selSos.appendChild(o);
+  });
+
+  // Modale — solo piloti
+  var lista=$('listaPersonale'); lista.innerHTML='';
+  (CFG.personale.piloti||[]).forEach(function(p){
+    var btn=mkBtn(p.grado,p.cognome+' '+p.nome);
+    btn.onclick=function(){ aggiungiPilota(p); chiudiModale('modalePersonale'); };
+    lista.appendChild(btn);
+  });
+}
+function autoCaricaPiloti(){
+  if(!CFG.personale || !CFG.personale.piloti) return;
+
+  var tbody = $('bodyPiloti');
+  tbody.innerHTML = '';
+  idxP = 0;
+
+  CFG.personale.piloti.forEach(function(p){
+    aggiungiPilota(p);
+  });
+}
+
+async function aggiornaMese(){
+  var mi=$('meseIdx').value, an=$('anno').value;
+  try{ var j=await(await fetch('/mensile/api/giorni?mese='+mi+'&anno='+an)).json(); giorniMese=j.giorni; }
+  catch(e){ giorniMese=[31,28,31,30,31,30,31,31,30,31,30,31][parseInt(mi)]; }
+}
+
+function aggiungiPilota(p){
+  var idx=idxP++, tbody=$('bodyPiloti');
+  var n=p||{};
+  var tr=document.createElement('tr'); tr.dataset.idx=idx;
+  tr.innerHTML=
+    '<td class="num-cell">'+(tbody.children.length+1)+'</td>'
+    +'<td><input type="text" class="inp-testo inp-grado" data-field="grado" value="'+esc(n.grado)+'"></td>'
+    +'<td><input type="text" class="inp-testo inp-upper" data-field="cognome" value="'+esc(n.cognome)+'"></td>'
+    +'<td><input type="text" class="inp-testo" data-field="nome" value="'+esc(n.nome)+'"></td>'
+    +'<td><input type="number" class="inp-num" data-field="spettanza" min="0" max="'+giorniMese+'" value="0" style="width:70px"></td>'
+    +'<td><button type="button" class="btn-rimuovi" onclick="rimuoviRiga(this)"><i class="fas fa-trash"></i></button></td>';
+  tbody.appendChild(tr);
+}
+
+function getVal(tr,field){ var el=tr.querySelector('[data-field="'+field+'"]'); return el?el.value:''; }
+
+function rimuoviRiga(btn){
+  var tbody=btn.closest('tr').parentNode;
+  btn.closest('tr').remove();
+  tbody.querySelectorAll('tr').forEach(function(r,i){ r.querySelector('.num-cell').textContent=i+1; });
+}
+
+function toggleAssente(){
+  $('bloccoAssente').style.display=$('chkAssente').checked?'block':'none';
+  aggiornaAnteprima();
+}
+function aggiornaAnteprima(){
+  var div=$('anteprima-firma');
+  if(!$('chkAssente').checked){ div.style.display='none'; return; }
+  var capo=CFG.capoNucleoAttivo||'';
+  var selSos=$('sostituto');
+  var sosVal=selSos.selectedIndex>0?selSos.options[selSos.selectedIndex].text:'';
+  if(!capo||!sosVal){ div.style.display='none'; return; }
+  div.style.display='block';
+  div.innerHTML='<strong>Anteprima firma:</strong><br>P. IL CAPO NUCLEO<br>'+capo+' t.a.<br>'+sosVal;
+}
+
+async function generaPDF(){
+  var piloti=[];
+  document.querySelectorAll('#bodyPiloti tr').forEach(function(tr){
+    var cog=getVal(tr,'cognome');
+    if(!cog||!cog.trim()) return;
+    piloti.push({
+      grado:     getVal(tr,'grado'),
+      cognome:   cog.trim(),
+      nome:      getVal(tr,'nome'),
+      spettanza: parseInt(getVal(tr,'spettanza'))||0
+    });
+  });
+  if(!piloti.length){ mostraErr('Inserire almeno un pilota.'); return; }
+
+  var dati={
+    meseIdx:    $('meseIdx').value,
+    anno:       $('anno').value,
+    protocollo: $('protocollo').value||'',
+    dataStatino:$('dataStatino').value||'',
+    capoNucleo: CFG.capoNucleoAttivo,
+    piloti:     piloti,
+    firmaAssente: $('chkAssente').checked
+  };
+  if(dati.firmaAssente){
+    var sos=$('sostituto').value;
+    if(!sos){ mostraErr('Selezionare il sostituto.'); return; }
+    var parts=sos.split('|');
+    dati.sostituito=dati.capoNucleo;
+    dati.sostituto=parts[0]+' '+parts[1]+' '+parts[2];
+  }
+
+  var btn=$('btnGenera'); btn.disabled=true;
+  btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Generazione...';
+  $('risultatoBox').style.display=$('erroreBox').style.display='none';
+  try{
+    var j=await(await fetch('/mensile/colazione/genera',{
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(dati)
+    })).json();
+    if(j.ok){
+      $('listaFiles').innerHTML=j.files.map(function(f){
+        return '<div class="file-item">'
+          +'<i class="fas fa-file-pdf"></i>'
+          +'<span class="file-nome">'+f.nome+'</span>'
+          +'<div class="file-btns">'
+          +'<a href="/mensile/view?path='+encodeURIComponent(f.path)+'" class="btn-view" target="_blank"><i class="fas fa-eye"></i> Visualizza</a>'
+          +'<a href="/mensile/download?path='+encodeURIComponent(f.path)+'" class="btn-download" download><i class="fas fa-download"></i> Scarica</a>'
+          +'</div></div>';
+      }).join('');
+      $('risultatoBox').style.display='block';
+      $('risultatoBox').scrollIntoView({behavior:'smooth'});
+    } else { mostraErr(j.errore||'Errore sconosciuto.'); }
+  } catch(e){ mostraErr('Errore: '+e.message); }
+  finally{ btn.disabled=false; btn.innerHTML='<i class="fas fa-file-pdf"></i> Genera PDF e Archivia'; }
+}
+
+function mostraErr(msg){
+  $('erroreMsg').textContent=msg; $('erroreBox').style.display='block';
+  $('erroreBox').scrollIntoView({behavior:'smooth'});
+}
+async function calcolaSpettanze(){
+  var piloti = [];
+  document.querySelectorAll('#bodyPiloti tr').forEach(function(tr){
+    var cog = getVal(tr,'cognome');
+    if(cog && cog.trim()) piloti.push(cog.trim());
+  });
+  if(!piloti.length){ mostraMsg('Aggiungi prima i piloti.', false); return; }
+
+  var btn = $('btnCalcola');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Calcolo...';
+
+  try{
+    var j = await (await fetch('/mensile/api/calcola-spettanze',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        anno:    $('anno').value,
+        meseIdx: $('meseIdx').value,
+        cognomi: piloti
+      })
+    })).json();
+
+    if(j.ok){
+      // Aggiorna le spettanze nelle righe
+      document.querySelectorAll('#bodyPiloti tr').forEach(function(tr){
+        var cog = getVal(tr,'cognome').trim().toUpperCase();
+        if(j.spettanze[cog] !== undefined){
+          tr.querySelector('[data-field="spettanza"]').value = j.spettanze[cog];
+        }
+      });
+      var msg = 'Spettanze calcolate! Giorni analizzati: '+j.giorniAnalizzati;
+      if(j.giorniSenzaFirmato>0) msg += ' ('+j.giorniSenzaFirmato+' senza file firmato)';
+      mostraMsg(msg, true);
+    } else {
+      mostraMsg('Errore: '+j.errore, false);
+    }
+  } catch(e){
+    mostraMsg('Errore di connessione: '+e.message, false);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-calculator"></i> Calcola da Ordini di Volo';
+  }
+}
+
+function mostraMsg(testo, ok){
+  var div = $('msgCalcolo');
+  div.textContent = testo;
+  div.style.display = 'block';
+  div.style.background = ok ? '#d4edda' : '#f8d7da';
+  div.style.color = ok ? '#155724' : '#721c24';
+  div.style.border = ok ? '1px solid #c3e6cb' : '1px solid #f5c6cb';
+  setTimeout(function(){ div.style.display='none'; }, 5000);
+}
+
+function resetForm(){
+  if(!confirm('Azzerare tutti i dati?')) return;
+  $('bodyPiloti').innerHTML=''; idxP=0;
+  $('risultatoBox').style.display=$('erroreBox').style.display='none';
+}
+</script>

@@ -1,0 +1,31 @@
+{
+  "_istruzioni": "Modificare questo file per aggiornare gli elenchi. Salvare in formato UTF-8.",
+  "capoNucleo": [
+    "C.F. (CP) Pil. Marco Massimo di NARDO",
+    "C.F. (CP) Pil. Riccardo DEFFERERIA"
+  ],
+  "piloti": [
+    {
+      "grado": "C.F. (CP) Pil.",
+      "cognome": "di NARDO",
+      "nome": "Marco Massimo"
+    },
+    {
+      "grado": "C.F. (CP) Pil.",
+      "cognome": "DEFFERERIA",
+      "nome": "Riccardo"
+    }
+  ],
+  "efv": [
+    {
+      "grado": "C.F. (CP) TC/Eli",
+      "cognome": "BASILE",
+      "nome": "Francesco P."
+    },
+    {
+      "grado": "1° Lgt. NP/OV",
+      "cognome": "NATALE",
+      "nome": "Luigi"
+    }
+  ]
+}

@@ -1,0 +1,300 @@
+{{! views/mensile/impostazioni.hbs }}
+<div class="mensile-container">
+
+  <nav class="mensile-breadcrumb">
+    <a href="/mensile"><i class="fas fa-home"></i> MENSILE</a>
+    <span class="sep">›</span>
+    <span>Impostazioni</span>
+  </nav>
+
+  <div class="mensile-header">
+    <div class="mensile-header-icon"><i class="fas fa-cog"></i></div>
+    <div>
+      <h1>Impostazioni</h1>
+      <p class="mensile-subtitle">Gestione personale e tariffe giornaliere</p>
+    </div>
+  </div>
+
+  <!-- TARIFFE -->
+  <div class="mensile-card">
+    <div class="mensile-card-title"><i class="fas fa-euro-sign"></i> Tariffe Giornaliere</div>
+    <div class="imp-grid">
+      <div class="campo-gruppo">
+        <label>Generi di Conforto (€/giorno)</label>
+        <input type="number" id="tarGeneri" step="0.01" min="0" class="inp-tariffa">
+      </div>
+      <div class="campo-gruppo">
+        <label>Colazione Obbligatoria (€/giorno)</label>
+        <input type="number" id="tarColazione" step="0.01" min="0" class="inp-tariffa">
+      </div>
+      <div class="campo-gruppo campo-align-bottom">
+        <button class="btn-salva" onclick="salvaTariffe()">
+          <i class="fas fa-save"></i> Salva Tariffe
+        </button>
+      </div>
+    </div>
+    <div id="msgTariffe" class="msg-feedback" style="display:none"></div>
+  </div>
+
+  <!-- PERCORSO ORDINI DI VOLO -->
+  <div class="mensile-card">
+    <div class="mensile-card-title"><i class="fas fa-folder-open"></i> Percorso Ordini di Volo</div>
+    <p style="font-size:13px;color:#666;margin:0 0 12px">
+      Percorso della cartella condivisa contenente gli ordini di volo.<br>
+      Struttura attesa: <code>PERCORSO\ANNO\MESE\GIORNO\file_Firmato.pdf</code>
+    </p>
+    <div class="imp-grid" style="grid-template-columns: 1fr auto;">
+      <div class="campo-gruppo">
+        <label>Percorso cartella ordini di volo</label>
+        <input type="text" id="percorsoODV" class="inp-testo" style="font-family:monospace;font-size:13px"
+               placeholder="es. \\\\server\ordini di volo">
+      </div>
+      <div class="campo-align-bottom">
+        <button class="btn-salva" onclick="salvaPercorsoODV()">
+          <i class="fas fa-save"></i> Salva
+        </button>
+      </div>
+    </div>
+    <div id="msgODV" class="msg-feedback" style="display:none"></div>
+  </div>
+
+  <!-- CAPO NUCLEO -->
+  <div class="mensile-card">
+    <div class="mensile-card-title">
+      <i class="fas fa-star"></i> Capo Nucleo
+      <button class="btn-aggiungi" onclick="aggiungiCapoNucleo()"><i class="fas fa-plus"></i> Aggiungi</button>
+    </div>
+    <div id="listaCapoNucleo" class="imp-lista"></div>
+    <div id="msgCapo" class="msg-feedback" style="display:none"></div>
+  </div>
+
+  <!-- PILOTI -->
+  <div class="mensile-card">
+    <div class="mensile-card-title">
+      <i class="fas fa-plane"></i> Piloti
+      <button class="btn-aggiungi" onclick="aggiungiPilota()"><i class="fas fa-plus"></i> Aggiungi</button>
+    </div>
+    <div class="table-responsive">
+      <table class="mensile-table" id="tablePiloti">
+        <thead>
+          <tr>
+            <th>Grado / Categoria</th>
+            <th>Cognome</th>
+            <th>Nome</th>
+            <th style="width:50px"></th>
+          </tr>
+        </thead>
+        <tbody id="bodyPiloti"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:12px">
+      <button class="btn-salva" onclick="salvaPiloti()"><i class="fas fa-save"></i> Salva Piloti</button>
+    </div>
+    <div id="msgPiloti" class="msg-feedback" style="display:none"></div>
+  </div>
+
+  <!-- EFV -->
+  <div class="mensile-card">
+    <div class="mensile-card-title">
+      <i class="fas fa-users"></i> Equipaggi Fissi di Volo (EFV)
+      <button class="btn-aggiungi" onclick="aggiungiEFV()"><i class="fas fa-plus"></i> Aggiungi</button>
+    </div>
+    <div class="table-responsive">
+      <table class="mensile-table" id="tableEFV">
+        <thead>
+          <tr>
+            <th>Grado / Categoria</th>
+            <th>Cognome</th>
+            <th>Nome</th>
+            <th style="width:50px"></th>
+          </tr>
+        </thead>
+        <tbody id="bodyEFV"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:12px">
+      <button class="btn-salva" onclick="salvaEFV()"><i class="fas fa-save"></i> Salva EFV</button>
+    </div>
+    <div id="msgEFV" class="msg-feedback" style="display:none"></div>
+  </div>
+
+</div>
+
+<script>
+var CFG = {};
+
+document.addEventListener('DOMContentLoaded', async function() {
+  var r = await fetch('/mensile/api/config');
+  CFG = await r.json();
+  // Percorso ODV
+  var percorso = (CFG.tariffe.ordiniVolo && CFG.tariffe.ordiniVolo.percorso) || '';
+  document.getElementById('percorsoODV').value = percorso;
+
+  renderTariffe();
+  renderCapoNucleo();
+  renderPiloti();
+  renderEFV();
+});
+
+// ── TARIFFE ───────────────────────────────────────────────────────────────────
+function renderTariffe() {
+  var t = CFG.tariffe || {};
+  document.getElementById('tarGeneri').value    = t.generiConforto       && t.generiConforto.importoGiornaliero       || 2.41;
+  document.getElementById('tarColazione').value = t.colazioneObbligatoria && t.colazioneObbligatoria.importoGiornaliero || 1.85;
+}
+
+async function salvaPercorsoODV() {
+  var percorso = document.getElementById('percorsoODV').value.trim();
+  if (!percorso) { mostraMsg('msgODV', 'Inserire un percorso valido.', false); return; }
+  var body = {
+    ordiniVolo: { percorso: percorso, descrizione: 'Percorso cartella ordini di volo' }
+  };
+  var r = await fetch('/mensile/api/salva-tariffe', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  var j = await r.json();
+  mostraMsg('msgODV', j.ok ? 'Percorso salvato!' : 'Errore: '+j.errore, j.ok);
+  if (j.ok) CFG.tariffe.ordiniVolo = body.ordiniVolo;
+}
+
+async function salvaTariffe() {
+  var body = {
+    generiConforto:       { importoGiornaliero: parseFloat(document.getElementById('tarGeneri').value),    descrizione: 'Generi di conforto' },
+    colazioneObbligatoria:{ importoGiornaliero: parseFloat(document.getElementById('tarColazione').value), descrizione: 'Colazione obbligatoria' }
+  };
+  var r = await fetch('/mensile/api/salva-tariffe', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  var j = await r.json();
+  mostraMsg('msgTariffe', j.ok ? 'Tariffe salvate!' : 'Errore: '+j.errore, j.ok);
+}
+
+// ── CAPO NUCLEO ───────────────────────────────────────────────────────────────
+function renderCapoNucleo() {
+  var lista = document.getElementById('listaCapoNucleo');
+  lista.innerHTML = '';
+  (CFG.personale.capoNucleo || []).forEach(function(cn, i) {
+    var div = document.createElement('div');
+    div.className = 'imp-riga-cn';
+    div.innerHTML = '<input type="text" class="inp-testo" value="'+esc(cn)+'" data-idx="'+i+'" style="flex:1">'
+      + '<button class="btn-rimuovi" onclick="rimuoviCN('+i+')"><i class="fas fa-trash"></i></button>';
+    lista.appendChild(div);
+  });
+}
+
+function aggiungiCapoNucleo() {
+  if (!CFG.personale.capoNucleo) CFG.personale.capoNucleo = [];
+  CFG.personale.capoNucleo.push('');
+  renderCapoNucleo();
+  var inputs = document.querySelectorAll('#listaCapoNucleo input');
+  if (inputs.length) inputs[inputs.length-1].focus();
+}
+
+function rimuoviCN(i) {
+  CFG.personale.capoNucleo.splice(i,1);
+  renderCapoNucleo();
+}
+
+async function salvaCapoNucleo() {
+  var inputs = document.querySelectorAll('#listaCapoNucleo input');
+  var lista = Array.from(inputs).map(function(el){ return el.value.trim(); }).filter(Boolean);
+  CFG.personale.capoNucleo = lista;
+  var r = await fetch('/mensile/api/salva-personale', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ capoNucleo: lista }) });
+  var j = await r.json();
+  mostraMsg('msgCapo', j.ok ? 'Capo Nucleo salvato!' : 'Errore: '+j.errore, j.ok);
+}
+
+// Salva automaticamente quando cambia il focus
+document.addEventListener('change', function(e) {
+  if (e.target.closest && e.target.closest('#listaCapoNucleo')) salvaCapoNucleo();
+});
+
+// ── PILOTI ────────────────────────────────────────────────────────────────────
+function renderPiloti() {
+  var tbody = document.getElementById('bodyPiloti');
+  tbody.innerHTML = '';
+  (CFG.personale.piloti || []).forEach(function(p, i) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><input type="text" class="inp-testo" value="'+esc(p.grado)+'" data-role="grado" data-idx="'+i+'"></td>'
+      + '<td><input type="text" class="inp-testo inp-upper" value="'+esc(p.cognome)+'" data-role="cognome" data-idx="'+i+'"></td>'
+      + '<td><input type="text" class="inp-testo" value="'+esc(p.nome)+'" data-role="nome" data-idx="'+i+'"></td>'
+      + '<td><button class="btn-rimuovi" onclick="rimuoviRiga(\'piloti\','+i+')"><i class="fas fa-trash"></i></button></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function aggiungiPilota() {
+  if (!CFG.personale.piloti) CFG.personale.piloti = [];
+  CFG.personale.piloti.push({ grado:'', cognome:'', nome:'' });
+  renderPiloti();
+  var rows = document.querySelectorAll('#bodyPiloti tr');
+  var last = rows[rows.length-1];
+  if (last) last.querySelector('input').focus();
+}
+
+function salvaPiloti() {
+  var rows = document.querySelectorAll('#bodyPiloti tr');
+  var lista = Array.from(rows).map(function(tr) {
+    return {
+      grado:   tr.querySelector('[data-role="grado"]').value.trim(),
+      cognome: tr.querySelector('[data-role="cognome"]').value.trim(),
+      nome:    tr.querySelector('[data-role="nome"]').value.trim()
+    };
+  }).filter(function(p){ return p.cognome; });
+  CFG.personale.piloti = lista;
+  fetch('/mensile/api/salva-personale', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ piloti: lista }) })
+    .then(function(r){ return r.json(); })
+    .then(function(j){ mostraMsg('msgPiloti', j.ok ? 'Piloti salvati!' : 'Errore: '+j.errore, j.ok); });
+}
+
+// ── EFV ───────────────────────────────────────────────────────────────────────
+function renderEFV() {
+  var tbody = document.getElementById('bodyEFV');
+  tbody.innerHTML = '';
+  (CFG.personale.efv || []).forEach(function(e, i) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><input type="text" class="inp-testo" value="'+esc(e.grado)+'" data-role="grado" data-idx="'+i+'"></td>'
+      + '<td><input type="text" class="inp-testo inp-upper" value="'+esc(e.cognome)+'" data-role="cognome" data-idx="'+i+'"></td>'
+      + '<td><input type="text" class="inp-testo" value="'+esc(e.nome)+'" data-role="nome" data-idx="'+i+'"></td>'
+      + '<td><button class="btn-rimuovi" onclick="rimuoviRiga(\'efv\','+i+')"><i class="fas fa-trash"></i></button></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function aggiungiEFV() {
+  if (!CFG.personale.efv) CFG.personale.efv = [];
+  CFG.personale.efv.push({ grado:'', cognome:'', nome:'' });
+  renderEFV();
+  var rows = document.querySelectorAll('#bodyEFV tr');
+  var last = rows[rows.length-1];
+  if (last) last.querySelector('input').focus();
+}
+
+function salvaEFV() {
+  var rows = document.querySelectorAll('#bodyEFV tr');
+  var lista = Array.from(rows).map(function(tr) {
+    return {
+      grado:   tr.querySelector('[data-role="grado"]').value.trim(),
+      cognome: tr.querySelector('[data-role="cognome"]').value.trim(),
+      nome:    tr.querySelector('[data-role="nome"]').value.trim()
+    };
+  }).filter(function(e){ return e.cognome; });
+  CFG.personale.efv = lista;
+  fetch('/mensile/api/salva-personale', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ efv: lista }) })
+    .then(function(r){ return r.json(); })
+    .then(function(j){ mostraMsg('msgEFV', j.ok ? 'EFV salvati!' : 'Errore: '+j.errore, j.ok); });
+}
+
+// ── Rimuovi riga tabella ──────────────────────────────────────────────────────
+function rimuoviRiga(tipo, i) {
+  CFG.personale[tipo === 'piloti' ? 'piloti' : 'efv'].splice(i,1);
+  if (tipo === 'piloti') renderPiloti(); else renderEFV();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(s){ return (s||'').replace(/"/g,'&quot;'); }
+
+function mostraMsg(id, testo, ok) {
+  var el = document.getElementById(id);
+  el.textContent = testo;
+  el.className   = 'msg-feedback ' + (ok ? 'msg-ok' : 'msg-err');
+  el.style.display = 'block';
+  setTimeout(function(){ el.style.display='none'; }, 3000);
+}
+</script>
