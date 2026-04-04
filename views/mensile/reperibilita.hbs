@@ -69,7 +69,10 @@
         </table>
       </div>
       <div style="margin-top:14px">
-        <button type="button" class="btn-calcola" onclick="calcolaReperibilita()">
+        <button type="button" id="btnCalcola" class="btn-calcola" onclick="calcolaReperibilita()">
+  <i class="fas fa-calculator"></i> Calcola da Ordini di Volo
+</button>
+
           <i class="fas fa-calculator"></i> Calcola da Ordini di Volo
         </button>
       </div>
@@ -186,57 +189,92 @@ function aggiungiPersonale(p){
   var idx=idxP++, tbody=$('bodyPersonale');
   var n=p||{};
   var tr=document.createElement('tr'); tr.dataset.idx=idx;
-  tr.innerHTML=
+
+  tr.innerHTML =
     '<td class="num-cell">'+(tbody.children.length+1)+'</td>'
     +'<td><input type="text" class="inp-testo inp-grado" data-field="grado" value="'+esc(n.grado)+'"></td>'
     +'<td><input type="text" class="inp-testo inp-upper" data-field="cognome" value="'+esc(n.cognome)+'"></td>'
     +'<td><input type="text" class="inp-testo" data-field="nome" value="'+esc(n.nome)+'"></td>'
     +'<td><input type="number" class="inp-num" data-field="giorni" min="0" max="'+giorniMese+'" value="0" style="width:70px"></td>'
+    +'<td><div class="dettagli-giorni" data-field="dettagli">—</div></td>'
     +'<td><button type="button" class="btn-rimuovi" onclick="rimuoviRiga(this)"><i class="fas fa-trash"></i></button></td>';
+
   tbody.appendChild(tr);
 }
 
-function rimuoviRiga(btn){
-  var tbody=btn.closest('tr').parentNode;
-  btn.closest('tr').remove();
-  tbody.querySelectorAll('tr').forEach(function(r,i){ r.querySelector('.num-cell').textContent=i+1; });
-}
 
-async function calcolaReperibilita(){
+function aggiungiPersonale(p){
+  var idx=idxP++, tbody=$('bodyPersonale');
+  var n=p||{};
+  var tr=document.createElement('tr'); tr.dataset.idx=idx;
+
+  tr.innerHTML =
+    '<td class="num-cell">'+(tbody.children.length+1)+'</td>'
+    +'<td><input type="text" class="inp-testo inp-grado" data-field="grado" value="'+esc(n.grado)+'"></td>'
+    +'<td><input type="text" class="inp-testo inp-upper" data-field="cognome" value="'+esc(n.cognome)+'"></td>'
+    +'<td><input type="text" class="inp-testo" data-field="nome" value="'+esc(n.nome)+'"></td>'
+    +'<td><input type="number" class="inp-num" data-field="giorni" min="0" max="'+giorniMese+'" value="0" style="width:70px"></td>'
+    +'<td><div class="dettagli-giorni" data-field="dettagli">—</div></td>'
+    +'<td><button type="button" class="btn-rimuovi" onclick="rimuoviRiga(this)"><i class="fas fa-trash"></i></button></td>';
+
+  tbody.appendChild(tr);
+}window.calcolaReperibilita = async function(){
   var cognomi=[];
   document.querySelectorAll('#bodyPersonale tr').forEach(function(tr){
     var cog=getVal(tr,'cognome');
     if(cog&&cog.trim()) cognomi.push(cog.trim());
   });
-  if(!cognomi.length){ mostraMsg('Aggiungi prima il personale.', false); return; }
+  if(!cognomi.length){
+    mostraMsg('Aggiungi prima il personale.', false);
+    return;
+  }
 
-  var btn=$('btnCalcola')||document.querySelector('.btn-calcola');
-  btn.disabled=true;
+  var btn = document.getElementById('btnCalcola');
+  btn.disabled = true;
   btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Calcolo in corso...';
 
   try{
-    var j=await(await fetch('/mensile/api/calcola-reperibilita',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ anno:$('anno').value, meseIdx:$('meseIdx').value, cognomi:cognomi })
-    })).json();
+    const res = await fetch('/mensile/api/calcola-reperibilita',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        anno: $('anno').value,
+        meseIdx: $('meseIdx').value,
+        cognomi: cognomi
+      })
+    });
+
+    const j = await res.json();
+    console.log("RISPOSTA BACKEND:", j);
 
     if(j.ok){
       document.querySelectorAll('#bodyPersonale tr').forEach(function(tr){
         var cog=getVal(tr,'cognome').trim().toUpperCase();
-        if(j.spettanze[cog]!==undefined){
-          tr.querySelector('[data-field="giorni"]').value=j.spettanze[cog];
+
+        if (j.spettanze[cog] !== undefined) {
+          tr.querySelector('[data-field="giorni"]').value = j.spettanze[cog];
+        }
+
+        if (j.dettagli[cog] !== undefined) {
+          const dett = j.dettagli[cog];
+          const box = tr.querySelector('[data-field="dettagli"]');
+          box.textContent = dett.length ? dett.join(', ') : '—';
         }
       });
-      var msg='Reperibilità calcolata! Giorni analizzati: '+j.giorniAnalizzati;
-      if(j.giorniSenzaFirmato>0) msg+=' ('+j.giorniSenzaFirmato+' senza file firmato)';
-      mostraMsg(msg, true);
-    } else { mostraMsg('Errore: '+j.errore, false); }
-  } catch(e){ mostraMsg('Errore: '+e.message, false); }
-  finally{
-    btn.disabled=false;
-    btn.innerHTML='<i class="fas fa-calculator"></i> Calcola da Ordini di Volo';
+
+      mostraMsg("Calcolo completato!", true);
+    } else {
+      mostraMsg("Errore: " + j.errore, false);
+    }
+
+  } catch(e){
+    mostraMsg("Errore: " + e.message, false);
   }
+
+  btn.disabled = false;
+  btn.innerHTML='<i class="fas fa-calculator"></i> Calcola da Ordini di Volo';
 }
+
 
 async function generaPDF(){
   var personale=[];

@@ -9,7 +9,9 @@
     "descrizione": "Colazione obbligatoria piloti - importo per giorno"
   },
   "ordiniVolo": {
-    "percorso": "\\\\napescara79\\ordini di volo",
+    "percorso": "/home/luigi/Scaricati/ordini di volo",
     "descrizione": "Percorso cartella ordini di volo (share di rete)"
   }
 }
+
+ 

@@ -299,8 +299,7 @@ async function generaPDF(){
 function mostraErr(msg){
   $('erroreMsg').textContent=msg; $('erroreBox').style.display='block';
   $('erroreBox').scrollIntoView({behavior:'smooth'});
-}
-async function calcolaSpettanze(){
+}async function calcolaSpettanze(){
   var piloti = [];
   document.querySelectorAll('#bodyPiloti tr').forEach(function(tr){
     var cog = getVal(tr,'cognome');
@@ -314,28 +313,50 @@ async function calcolaSpettanze(){
 
   try{
     var j = await (await fetch('/mensile/api/calcola-spettanze',{
-      method:'POST', headers:{'Content-Type':'application/json'},
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
-        anno:    $('anno').value,
+        anno: $('anno').value,
         meseIdx: $('meseIdx').value,
         cognomi: piloti
       })
     })).json();
 
     if(j.ok){
-      // Aggiorna le spettanze nelle righe
+      let riepilogo = [];
+
       document.querySelectorAll('#bodyPiloti tr').forEach(function(tr){
         var cog = getVal(tr,'cognome').trim().toUpperCase();
+
         if(j.spettanze[cog] !== undefined){
-          tr.querySelector('[data-field="spettanza"]').value = j.spettanze[cog];
+          const val = j.spettanze[cog];
+          tr.querySelector('[data-field="spettanza"]').value = val;
+
+          const giorni = j.dettagli && j.dettagli[cog] ? j.dettagli[cog] : [];
+
+          riepilogo.push(
+            cog + ': ' + val + ' gg' +
+            (giorni.length ? ' → [' + giorni.join(', ') + ']' : '')
+          );
         }
       });
-      var msg = 'Spettanze calcolate! Giorni analizzati: '+j.giorniAnalizzati;
-      if(j.giorniSenzaFirmato>0) msg += ' ('+j.giorniSenzaFirmato+' senza file firmato)';
+
+      var msg = 'Spettanze calcolate!\n' + riepilogo.join('\n');
+
+      if(j.giorniAnalizzati !== undefined){
+        msg += '\nGiorni analizzati: ' + j.giorniAnalizzati;
+      }
+
+      if(j.giorniSenzaFirmato > 0){
+        msg += ' (' + j.giorniSenzaFirmato + ' senza file firmato)';
+      }
+
       mostraMsg(msg, true);
+
     } else {
       mostraMsg('Errore: '+j.errore, false);
     }
+
   } catch(e){
     mostraMsg('Errore di connessione: '+e.message, false);
   } finally {
@@ -346,12 +367,11 @@ async function calcolaSpettanze(){
 
 function mostraMsg(testo, ok){
   var div = $('msgCalcolo');
-  div.textContent = testo;
+  div.innerHTML = testo.replace(/\n/g,'<br>');
   div.style.display = 'block';
   div.style.background = ok ? '#d4edda' : '#f8d7da';
   div.style.color = ok ? '#155724' : '#721c24';
   div.style.border = ok ? '1px solid #c3e6cb' : '1px solid #f5c6cb';
-  setTimeout(function(){ div.style.display='none'; }, 5000);
 }
 
 function resetForm(){

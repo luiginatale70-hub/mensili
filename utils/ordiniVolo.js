@@ -1,21 +1,10 @@
-/**
- * ordiniVolo.js
- * Calcola spettanze colazione e giorni reperibilità
- * analizzando gli ordini di volo firmati del mese.
- *
- * Struttura: PERCORSO_BASE\ANNO\MESE\GIORNO\file_Firmato.pdf
- * Regole selezione file:
- *   1. Il file DEVE contenere "Firmato" nel nome
- *   2. Tra i firmati, prende quello con VAR numero più alto
- */
-
-const fs       = require('fs');
-const path     = require('path');
+const fs = require('fs');
+const path = require('path');
 const pdfParse = require('pdf-parse');
 
 const NOMI_MESI = [
-  'gennaio','febbraio','marzo','aprile','maggio','giugno',
-  'luglio','agosto','settembre','ottobre','novembre','dicembre'
+  '01 GENNAIO','02 FEBBRAIO','03 MARZO','04 APRILE','05 MAGGIO','06 GIUGNO',
+  '07 LUGLIO','08 AGOSTO','09 SETTEMBRE','10 OTTOBRE','11 NOVEMBRE','12 DICEMBRE'
 ];
 
 function getPercorsoBase() {
@@ -23,17 +12,12 @@ function getPercorsoBase() {
     const cfg = JSON.parse(fs.readFileSync(
       path.join(__dirname,'..','config','tariffe.json'), 'utf8'
     ));
-    return (cfg.ordiniVolo && cfg.ordiniVolo.percorso) || '\\\\napescara79\\ordini di volo';
+    return (cfg.ordiniVolo && cfg.ordiniVolo.percorso) || '/home/luigi/Scaricati/ordini di volo';
   } catch(e) {
-    return '\\\\napescara79\\ordini di volo';
+    return '/home/luigi/Scaricati/ordini di volo';
   }
 }
 
-/**
- * Sceglie l'ultima versione FIRMATA tra i file di una cartella giorno.
- * REGOLA: il file DEVE contenere "Firmato" nel nome.
- * Tra i firmati, prende quello con VAR numero più alto.
- */
 function scegliUltimaVersione(files) {
   const pdf = files.filter(f => f.toLowerCase().endsWith('.pdf'));
   const firmati = pdf.filter(f => /firmato/i.test(f));
@@ -52,117 +36,173 @@ function scegliUltimaVersione(files) {
 }
 
 /**
- * Verifica se il pilota è nella colonna Piloti con ruolo (P),(IP),(2P),(CP)
+ * ESTRAE SOLO BLOCCO NOMINATIVI (TRA "Nominativo" E "Note")
  */
-function pilotaPresente(testo, cognome) {
-  if (!cognome || !testo) return false;
-  const cog = cognome.toUpperCase().trim();
-  const pattern = new RegExp(cog + '\\s*\\((?:P|IP|2P|CP)\\)', 'i');
-  return pattern.test(testo.toUpperCase());
+function estraiSezioneNominativi(testo) {
+  const t = testo.toUpperCase();
+
+  const start = t.indexOf('NOMINATIVO');
+  if (start === -1) return t;
+
+  const end = t.indexOf('NOTE', start);
+  if (end === -1) return t.slice(start);
+
+  return t.slice(start, end);
 }
 
 /**
- * Estrae i nominativi dall'equipaggio P-42 nella sezione SERVIZIO DI ALLARME.
+ * MATCH PRECISO SU PAROLE
+ */
+function pilotaPresente(testo, cognome) {
+  if (!cognome || !testo) return false;
+
+  const cog = cognome.toUpperCase().trim();
+  const t = testo.toUpperCase();
+
+  // match cognome con grado davanti e ruolo pilota
+  const re = new RegExp(
+    `(?:^|\\s)(?:[0-9°A-Z]+\\s+)*${cog}\\s*\\((P|IP|2P|CP)\\)`,
+    'i'
+  );
+
+  const trovato = re.test(t);
+
+  if (trovato) console.log("COLAZIONE MATCH:", cog);
+
+  return trovato;
+}
+
+/**
+ * REPERIBILITÀ (già funzionante)
  */
 function estraiEquipaggioP42(testo) {
   const t = testo.toUpperCase();
 
-  if (/ALLARME\s+SOSPESO/.test(t)) return [];
+  const startAllarme = t.indexOf("SERVIZIO DI ALLARME");
+  if (startAllarme === -1) return [];
 
-  const idxAllarme = t.indexOf('SERVIZIO DI ALLARME');
-  if (idxAllarme === -1) return [];
+  const startEquip = t.indexOf("EQUIPAGGIO", startAllarme);
+  if (startEquip === -1) return [];
 
-  const idxEquip = t.indexOf('EQUIPAGGIAMENTI OPERATIVI');
-  const blocco = idxEquip !== -1 ? t.slice(idxAllarme, idxEquip) : t.slice(idxAllarme);
+  const end = t.indexOf("EQUIPAGGIAMENTI OPERATIVI", startEquip);
 
-  const idxP42 = blocco.indexOf('P-42');
-  if (idxP42 === -1) return [];
+  const blocco = end !== -1
+    ? t.slice(startEquip, end)
+    : t.slice(startEquip);
 
-  const idxPH139 = blocco.indexOf('PH-139', idxP42);
-  const sezioneP42 = idxPH139 !== -1 ? blocco.slice(idxP42, idxPH139) : blocco.slice(idxP42);
-
-  // Se sezione vuota o solo "//" è sospeso
-  const contenuto = sezioneP42.replace(/P-42|MANTA|IN CAMPO|IN REPERIBILIT[A\u00C0]|\d{2}:\d{2}|\(\d+\)|[\/\-]/g,'').trim();
-  if (!contenuto || contenuto.length < 10) return [];
-
-  const re = /([A-Z][A-Z\u00C0-\u00D6\u00D8-\u00F6\s\u00B0\u00AA\d\.]+?)\s*\((?:P|IP|2P|CP|OV|TEV|ASAV|AOV|ARS|CV|EV|IS)\)/g;
-  const trovati = [];
-  let m;
-  while ((m = re.exec(sezioneP42)) !== null) {
-    const nome = m[1].trim();
-    if (nome.length > 2) trovati.push(nome);
+  if (blocco.includes("ALLARME SOSPESO")) {
+    console.log("P42: ALLARME SOSPESO");
+    return [];
   }
+
+  const righe = blocco.split("\n");
+
+ const re = /^([0-9°A-ZÀ-ÖØ-Ý]+(?:\s+[0-9°A-ZÀ-ÖØ-Ý]+)*)\s*\((P|IP|2P|CP|OV|TEV|ASAV|AOV|ARS|CV|EV|IS)\)/;
+  const trovati = [];
+
+  for (const riga of righe) {
+    const r = riga.trim();
+
+    const match = r.match(re);
+    if (match) {
+      let nomeCompleto = match[1].trim();
+
+// rimuove grado iniziale (CF, CC, STV, LGT, ecc)
+nomeCompleto = nomeCompleto.replace(/^(CF|CC|TV|LGT|SGT|STV|1°LGT|1°\s*LGT)\s+/g, '');
+
+trovati.push(nomeCompleto);
+    }
+  }
+
+  console.log("P42 TROVATI:", trovati);
+
   return trovati;
 }
 
-/**
- * Verifica se il cognome del personale NAAF è nell'equipaggio P-42 allarme
- */
 function personaleInAllarmeP42(testo, cognome) {
   if (!cognome || !testo) return false;
-  const equipaggio = estraiEquipaggioP42(testo);
-  const cog = cognome.toUpperCase().trim();
-  return equipaggio.some(nome => nome.includes(cog));
-}
 
-/**
- * Funzione generica per analizzare tutti i giorni del mese
- */
+  const equipaggio = estraiEquipaggioP42(testo);
+
+  const normalizza = (s) =>
+    s.toUpperCase()
+     .replace(/^(CF|CC|TV|LGT|SGT|STV)\s+/, '')
+     .replace(/\s+/g, ' ')
+     .trim();
+
+  const cog = normalizza(cognome);
+
+return equipaggio.some(nome => {
+  const n = normalizza(nome);
+
+  if (n === cog) return true;
+
+  const parti = n.split(" ");
+
+  const prefissi = ["DI", "DE", "DEL", "DELLA", "D'"];
+
+  // escludi cognomi composti con prefisso
+  if (parti.length > 1 && prefissi.includes(parti[0])) {
+    return false;
+  }
+
+  // match cognome semplice
+  return parti[parti.length - 1] === cog;
+});
+ }
 async function analizzaMese(anno, meseIdx, cognomi, checkFn) {
   const basePath = getPercorsoBase();
   const meseName = NOMI_MESI[meseIdx];
   const cartellaBase = path.join(basePath, String(anno), meseName);
 
   const risultati = {}, dettagli = {};
-  cognomi.forEach(c => { risultati[c.toUpperCase()] = 0; dettagli[c.toUpperCase()] = []; });
-
-  if (!fs.existsSync(cartellaBase)) {
-    throw new Error(`Cartella non trovata: ${cartellaBase}\nVerifica il percorso nelle Impostazioni.`);
-  }
+  cognomi.forEach(c => {
+    risultati[c.toUpperCase()] = 0;
+    dettagli[c.toUpperCase()] = [];
+  });
 
   const giorni = fs.readdirSync(cartellaBase)
     .filter(d => fs.statSync(path.join(cartellaBase, d)).isDirectory())
     .sort();
-
-  let giorniAnalizzati = 0, giorniSenzaFirmato = 0;
 
   for (const giorno of giorni) {
     const cartellaGiorno = path.join(cartellaBase, giorno);
     const files = fs.readdirSync(cartellaGiorno);
     const ultimoFile = scegliUltimaVersione(files);
 
-    if (!ultimoFile) { giorniSenzaFirmato++; continue; }
-    giorniAnalizzati++;
+    if (!ultimoFile) continue;
 
     try {
-      const data = await pdfParse(fs.readFileSync(path.join(cartellaGiorno, ultimoFile)));
+      const buffer = fs.readFileSync(path.join(cartellaGiorno, ultimoFile));
+      const data = await pdfParse(buffer);
       const testo = data.text;
+
       for (const cognome of cognomi) {
         if (checkFn(testo, cognome)) {
           risultati[cognome.toUpperCase()]++;
           dettagli[cognome.toUpperCase()].push(giorno);
         }
       }
+
     } catch(e) {
       console.warn(`[ODV] Errore ${ultimoFile}: ${e.message}`);
     }
   }
 
-  return { spettanze: risultati, dettagli, giorniAnalizzati, giorniSenzaFirmato };
+  return { spettanze: risultati, dettagli };
 }
 
-/**
- * Calcola spettanze colazione (presenza come pilota nei voli)
- */
 async function calcolaSpettanze(anno, meseIdx, cognomi) {
   return analizzaMese(anno, meseIdx, cognomi, pilotaPresente);
 }
 
-/**
- * Calcola giorni reperibilità (presenza equipaggio P-42 allarme)
- */
 async function calcolaReperibilita(anno, meseIdx, cognomi) {
   return analizzaMese(anno, meseIdx, cognomi, personaleInAllarmeP42);
 }
 
-module.exports = { calcolaSpettanze, calcolaReperibilita, getPercorsoBase, NOMI_MESI };
+module.exports = {
+  calcolaSpettanze,
+  calcolaReperibilita,
+  getPercorsoBase,
+  NOMI_MESI
+};
