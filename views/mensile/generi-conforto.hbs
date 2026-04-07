@@ -63,11 +63,8 @@
       </div>
     </div>
 
-<<<<<<< HEAD
 
   <div class="pia-col">
-=======
->>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
     <!-- PILOTI -->
     <div class="mensile-card">
       <div class="mensile-card-title">
@@ -103,11 +100,6 @@
         </table>
       </div>
     </div>
-<<<<<<< HEAD
-  
-=======
-
->>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
     <!-- EQUIPAGGI FISSI DI VOLO -->
     <div class="mensile-card">
       <div class="mensile-card-title">
@@ -204,11 +196,7 @@ document.addEventListener('DOMContentLoaded',async function(){
   $('dataLettera').value=d+'/'+m+'/'+oggi.getFullYear();
   await caricaConfig();
   await aggiornaMese();
-<<<<<<< HEAD
   autoCaricaDati();
-
-=======
->>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
   $('btnAggiungiPilota').onclick=function(){apriModale('modalePiloti');};
   $('btnAggiungiEFV').onclick=function(){apriModale('modaleEFV');};
   $('btnGenera').onclick=generaPDF;
@@ -255,7 +243,6 @@ async function caricaConfig(){
   $('tariffeInfo').innerHTML='<i class="fas fa-info-circle"></i> Generi: <strong>€ '+(t.generiConforto&&t.generiConforto.importoGiornaliero||2.41)+'/gg</strong> &nbsp;|&nbsp; Colazione: <strong>€ '+(t.colazioneObbligatoria&&t.colazioneObbligatoria.importoGiornaliero||1.85)+'/gg</strong>';
 }
 
-<<<<<<< HEAD
 function autoCaricaDati(){
   if(!CFG.personale) return;
 
@@ -281,8 +268,7 @@ function autoCaricaDati(){
 
 
 
-=======
->>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
+
 function mkBtn(grado,nome){
   var btn=document.createElement('button');btn.type='button';btn.className='modale-item';
   btn.innerHTML='<span class="item-grado">'+grado+'</span><span class="item-nome">'+nome+'</span>';

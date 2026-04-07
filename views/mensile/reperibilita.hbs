@@ -132,11 +132,8 @@ document.addEventListener('DOMContentLoaded', async function(){
   $('anno').value=oggi.getFullYear();
   await caricaConfig();
   await aggiornaMese();
-<<<<<<< HEAD
   autoCaricaPersonale();
 
-=======
->>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
   $('btnAggiungi').onclick=function(){ apriModale('modalePersonale'); };
   $('btnGenera').onclick=generaPDF;
   document.querySelectorAll('.modale').forEach(function(el){
@@ -157,7 +154,7 @@ async function caricaConfig(){
   });
 }
 
-<<<<<<< HEAD
+
 function autoCaricaPersonale(){
   if(!CFG.personale) return;
 
@@ -175,9 +172,6 @@ function autoCaricaPersonale(){
 }
 
 
-
-=======
->>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
 async function aggiornaMese(){
   var mi=$('meseIdx').value, an=$('anno').value;
   try{ var j=await(await fetch('/mensile/api/giorni?mese='+mi+'&anno='+an)).json(); giorniMese=j.giorni; }

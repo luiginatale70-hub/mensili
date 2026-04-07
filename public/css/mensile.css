@@ -40,12 +40,10 @@ body {
 }
 /* Logo CASEV: se presente mostra immagine, altrimenti ancora */
 .naaf-brand-logo {
-<<<<<<< HEAD
-  height: 86px; width: auto;
-=======
-  height: 36px; width: auto;
->>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
-  object-fit: contain;
+  width: 40px;
+  height: auto;
+  max-width: 100%;
+  display: block;
 }
 .naaf-brand-logo-fallback {
   font-size: 22px; color: var(--accent);
@@ -661,7 +659,7 @@ label { font-size: 14px !important; font-weight: 600; }
 }
 .btn-calcola:hover { background: #ca6f1e; }
 .btn-calcola:disabled { opacity: .6; cursor: not-allowed; }
-<<<<<<< HEAD
+
 /* ── SIDEBAR (NUOVA) ───────────────────────────────────── */
 
 .naaf-layout {
@@ -776,5 +774,4 @@ label { font-size: 14px !important; font-weight: 600; }
   flex-direction:column;
   gap:20px;
 }
-=======
->>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
+

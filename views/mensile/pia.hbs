@@ -8,11 +8,11 @@
   </nav>
 
   <div class="mensile-header">
-<<<<<<< HEAD
+
     <div class="mensile-header-icon"><i class="fas fa-plane"></i></div>
 =======
     <div class="mensile-header-icon"><i class="fas fa-helicopter"></i></div>
->>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
+
     <div>
       <h1>Pronto Intervento Aereo</h1>
       <p class="mensile-subtitle">Genera lettera + elenchi PIA, Istruttori, EFV, Assenze</p>
@@ -64,7 +64,7 @@
         <div id="anteprima-firma" class="anteprima-firma" style="display:none"></div>
       </div>
     </div>
-<<<<<<< HEAD
+
 <div class="pia-grid">
 
   <!-- COLONNA SINISTRA -->
@@ -94,7 +94,6 @@
         <table class="mensile-table">
           <thead>
             <tr>
-<<<<<<< HEAD
               <th>#</th><th>Grado</th><th>Cognome</th><th>Nome</th><th>Gg</th><th></th>
 =======
               <th class="col-num">#</th>
@@ -162,7 +161,6 @@
         <table class="mensile-table">
           <thead>
             <tr>
-<<<<<<< HEAD
               <th>#</th><th>Grado</th><th>Cognome</th><th>Nome</th><th>Gg</th><th></th>
 =======
               <th class="col-num">#</th>
@@ -179,7 +177,7 @@
       </div>
     </div>
 
-<<<<<<< HEAD
+
    <!-- ASSENZE -->
     <div class="mensile-card">
       <div class="mensile-card-title">
@@ -187,7 +185,7 @@
         <button type="button" class="btn-aggiungi" onclick="apriModale('modaleASS')">
   <i class="fas fa-plus"></i> Aggiungi Assenza
 </button>
-=======
+
     <!-- EFV -->
     <div class="mensile-card">
       <div class="mensile-card-title">
@@ -242,13 +240,11 @@
       </div>
     </div>
 
-<<<<<<< HEAD
+
   </div> <!-- FINE COLONNA DESTRA -->
 
 </div>
 
-=======
->>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
     <!-- GENERA -->
     <div class="mensile-card mensile-card-genera">
       <div class="genera-actions">
@@ -323,13 +319,11 @@ document.addEventListener('DOMContentLoaded', async function(){
   var oggi=new Date();
   $('meseIdx').value=oggi.getMonth();
   $('anno').value=oggi.getFullYear();
-<<<<<<< HEAD
 await caricaConfig();
 autoCaricaPIA();
 await aggiornaMese();
  
   document.getElementById('btnGenera').addEventListener('click', generaPDF);
-=======
   await caricaConfig();
   await aggiornaMese();
   $('btnAggiungiPIA').onclick = function(){ apriModale('modalePIA'); };
@@ -347,7 +341,7 @@ await aggiornaMese();
 async function caricaConfig(){
   try{ CFG=await(await fetch('/mensile/api/config')).json(); }
   catch(e){ CFG={personale:{capoNucleo:[],piloti:[],efv:[]},tariffe:{}}; }
-<<<<<<< HEAD
+
 
   CFG.capoNucleoAttivo=(CFG.personale.capoNucleo||[])[0]||'';
 
@@ -372,7 +366,7 @@ async function caricaConfig(){
     selSos.appendChild(o);
   });
 
-<<<<<<< HEAD
+
 
 
   // ===== IST → PILOTI =====
@@ -518,7 +512,6 @@ function rimuoviRiga(btn){
   tr.remove();
   tbody.querySelectorAll('tr').forEach(function(r,i){ r.querySelector('.num-cell').textContent=i+1; });
 }
-<<<<<<< HEAD
 function raccogliTabella(bodyId){
   var righe = [];
 
@@ -639,9 +632,5 @@ function resetForm(){
   idxPIA=idxIST=idxEFV=idxASS=0;
   $('risultatoBox').style.display=$('erroreBox').style.display='none';
 }
-<<<<<<< HEAD
 
-
-=======
->>>>>>> 5e952d3c19115e4f179b11f059bfcc4e719fd168
 </script>
